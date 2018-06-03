@@ -1,0 +1,40 @@
+{
+  "name": "blog-contents-builder",
+  "version": "1.0.0",
+  "description": "Build blog contents",
+  "main": ".eslintrc.js",
+  "scripts": {
+    "start": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Terry-Su/BlogContentsBuilder.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Terry-Su/BlogContentsBuilder/issues"
+  },
+  "homepage": "https://github.com/Terry-Su/BlogContentsBuilder#readme",
+  "devDependencies": {
+    "@types/fs-extra": "^5.0.2",
+    "@types/jasmine": "^2.8.8",
+    "@types/lodash": "^4.14.109",
+    "@types/marked": "^0.3.0",
+    "@types/node": "^10.3.0",
+    "ajv": "^6.5.0",
+    "directory-tree": "^2.1.0",
+    "eslint": "^4.19.1",
+    "eslint-plugin-prettier": "^2.6.0",
+    "fs-extra": "^6.0.1",
+    "gulp": "^3.9.1",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-typescript": "^4.0.2",
+    "jasmine": "^3.1.0",
+    "lodash": "^4.17.10",
+    "marked": "^0.4.0",
+    "typescript": "^2.9.1",
+    "typescript-eslint-parser": "^15.0.0"
+  }
+}

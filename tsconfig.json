@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+		"target": "es5",
+		"allowJs": true,
+		"sourceMap": true,
+		"lib": [
+			"es5",
+			"es2015",
+		],
+		"allowSyntheticDefaultImports": true,
+		"outDir": "build"
+  },
+  "include": [
+		"src/**/*",
+	],
+	"exclude": [
+		"node_modules"
+	],
+	"typeRoots": ["src/typings"]
+}
