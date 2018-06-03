@@ -4,7 +4,8 @@
   "description": "Build blog contents",
   "main": ".eslintrc.js",
   "scripts": {
-    "start": "gulp"
+    "start": "gulp",
+    "test": "node spec/jasmineEntry"
   },
   "repository": {
     "type": "git",

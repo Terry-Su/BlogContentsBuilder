@@ -49,10 +49,10 @@ function asyncMainOther() {
 
 function main() {
 	try {
-		deleteBuild().then( () => {
+		// deleteBuild().then( () => {
 			asyncMainOther()
 			asyncMainTs()
-		} )
+		// } )
 	} catch (e) {
 		watcher.remove()
 		watcher.end()

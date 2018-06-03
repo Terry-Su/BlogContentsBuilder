@@ -505,7 +505,10 @@ export class Actions {
     function output( blogInfo: BlogInfo ) {
       const outputPath = self.getters.getBlogDetailPageHtmlPath( blogInfo )
       const html = utilGetters.getBlogDetailPageHtml( blogInfo )
-      FS.outputFileSync( outputPath, html )
+
+      if ( ! utilGetters.isSameFileTextsWithText( outputPath, html ) ) {
+        FS.outputFileSync( outputPath, html )
+      }
     }
   }
 }

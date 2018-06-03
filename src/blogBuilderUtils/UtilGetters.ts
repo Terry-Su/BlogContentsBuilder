@@ -26,6 +26,7 @@ import { UTF8 } from '../constants/names';
 import { ClientNavBlog } from "../typings/ClientNavBlog"
 import getBlogDetailHtml from "../constants/dynamic/getBlogDetailHtml";
 import { BlogInfo } from "../typings/BlogInfo";
+import { readFileSync } from "../utils/fs";
 const dirTree = require( "directory-tree" )
 
 export default class UtilGetters {
@@ -38,21 +39,25 @@ export default class UtilGetters {
   }
 
   getBlogIntroduction( blogPath: string ) {
-    const string: string = FS.readFileSync( blogPath, { encoding: UTF8 } )
+    const string: string =  readFileSync( blogPath )
     return notNil( string ) ?
       string.trim().substr( 0, BLOG_INTRODUCTION_CHARS_COUNT ) :
       ""
   }
 
-
   getBlogDetailPageHtml( blog: BlogInfo ): string {
     const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName } = blog
-    const string = FS.readFileSync( blogPath, { encoding: UTF8 } )
+    const string = readFileSync( blogPath )
     if ( string ) {
       const blogHtml = marked( string )
 
       return getBlogDetailHtml( blogName, blogHtml )
     }
     return ""
+  }
+
+  isSameFileTextsWithText( filePath: string, text: string ) {
+    const fileText: string = readFileSync( filePath )
+    return notNil( fileText ) ? fileText === text : false 
   }
 }
