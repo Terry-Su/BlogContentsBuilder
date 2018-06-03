@@ -1,4 +1,14 @@
-export default function( blogName: string, blogHtml: string ) {
+import { INSERTED_SCRIPTS, NAME, MARKED_HTML } from "../names";
+export default function({
+  [NAME]: name,
+  [MARKED_HTML]: markedHtml,
+  [INSERTED_SCRIPTS]: insertedScripts
+}: any) {
+  let insertedScriptsString = ''
+  insertedScripts.map( ( scriptString: string ) => {
+    insertedScriptsString = insertedScriptsString + scriptString
+  } )
+
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -6,11 +16,13 @@ export default function( blogName: string, blogHtml: string ) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>${blogName}</title>
+  <title>${name}</title>
 </head>
 <body>
-  ${blogHtml}
+  ${markedHtml}
+
+  ${insertedScriptsString}
 </body>
 </html>
-`
+`;
 }

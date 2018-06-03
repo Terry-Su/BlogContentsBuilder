@@ -45,17 +45,6 @@ export default class UtilGetters {
       ""
   }
 
-  getBlogDetailPageHtml( blog: BlogInfo ): string {
-    const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName } = blog
-    const string = readFileSync( blogPath )
-    if ( string ) {
-      const blogHtml = marked( string )
-
-      return getBlogDetailHtml( blogName, blogHtml )
-    }
-    return ""
-  }
-
   isSameFileTextsWithText( filePath: string, text: string ) {
     const fileText: string = readFileSync( filePath )
     return notNil( fileText ) ? fileText === text : false 

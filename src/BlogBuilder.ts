@@ -22,7 +22,7 @@ export default class BlogBuilder {
 
   }
 
-  build() {
-    this.actions.build()
+  build( config: any ) {
+    this.actions.build( config )
   }
 }

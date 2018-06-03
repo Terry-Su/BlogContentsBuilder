@@ -10,7 +10,8 @@ export const NEWEST_BLOGS = 'newestBlogs'
 export const TOP_DIRECTORY_NAME = 'topDirectoryName'
 export const INTRODUCTION = 'introduction'
 export const NAME_NEWEST_BLOGS_COUNT = 'newestBlogsCount'
-
+export const MARKED_HTML = 'markedHtml'
+export const CONFIG = 'config'
 
 export const FILE = 'file'
 export const DIRECTORY = 'directory'
@@ -22,5 +23,8 @@ export const ALL = 'All'
 export const DOT_MD = '.md'
 export const DOT_JSON = '.json'
 export const DOT_HTML = '.html'
+
+export const INSERTED_SCRIPTS = 'insertedScripts'
+
 
 export const UTF8 = 'utf8'
