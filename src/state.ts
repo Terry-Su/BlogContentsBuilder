@@ -354,6 +354,9 @@ export class Getters {
     }
   }
 
+  /**
+   * Get the info of the blogs whose upper path is the paramater path 
+   */
   getBlogsInfo( path: string ): BlogInfo[] {
     const self = this
     const { utilGetters } = this
@@ -511,7 +514,7 @@ export class Actions {
     }
     notNil( config ) && mutations.UPDATE_CONFIG( combinedConfig )
 
-    const blogsInfo: BlogInfo[] = getters.getBlogsInfo( root )
+    const blogsInfo: BlogInfo[] = getters.getAllBlogsInfo( root )
     mutations.UPDATE_BLOGS_INFO( blogsInfo )
 
     this.buildClientNavJson()
