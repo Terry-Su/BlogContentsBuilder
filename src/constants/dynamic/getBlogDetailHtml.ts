@@ -19,6 +19,8 @@ export default function({
   <title>${name}</title>
 </head>
 <body>
+  <div id="app"></div>
+
   ${markedHtml}
 
   ${insertedScriptsString}

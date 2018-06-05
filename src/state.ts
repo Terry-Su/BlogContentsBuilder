@@ -1,33 +1,33 @@
 import {
   isDirectoryType,
   filterIsDirectoryType
-} from "./blogBuilderUtils/dirTree";
+} from "./blogBuilderUtils/dirTree"
 import {
   isBlogDirectoryInfo,
   getBlogFilePath,
   getBlogPropsFilePath
-} from "./blogBuilderUtils/getBlogsInfo";
-import { notNil } from "./utils/lodash";
-import getFileNameWithoutItsExtension from "./utils/getFileNameWithoutItsExtension";
-import BLOG_PROPS_SCHEMA from "./constants/schemas/BLOG_PROPS_SCHEMA";
-import readJsonFromFile from "./utils/readJsonFromFile";
-import { isValidDateString } from "./blogBuilderUtils/validate";
-import { isNil, cloneDeep, uniqWith, take } from "lodash";
-import { DEFAULT_CONFIG } from "./constants/default/index";
-import BlogBuilder from "./BlogBuilder";
-import UtilGetters from "./blogBuilderUtils/UtilGetters";
-import { notEmpty, isEmpty } from "./utils/array";
-import { ClientNav } from "./typings/ClientNav";
-import { Category, Tag } from "./typings/Store";
-import { Config } from "./typings/Config";
-import * as FS from "fs-extra";
-import * as PATH from "path";
+} from "./blogBuilderUtils/getBlogsInfo"
+import { notNil } from "./utils/lodash"
+import getFileNameWithoutItsExtension from "./utils/getFileNameWithoutItsExtension"
+import BLOG_PROPS_SCHEMA from "./constants/schemas/BLOG_PROPS_SCHEMA"
+import readJsonFromFile from "./utils/readJsonFromFile"
+import { isValidDateString } from "./blogBuilderUtils/validate"
+import { isNil, cloneDeep, uniqWith, take } from "lodash"
+import { DEFAULT_CONFIG } from "./constants/default/index"
+import BlogBuilder from "./BlogBuilder"
+import UtilGetters from "./blogBuilderUtils/UtilGetters"
+import { notEmpty, isEmpty } from "./utils/array"
+import { ClientNav } from "./typings/ClientNav"
+import { Category, Tag } from "./typings/Store"
+import { Config } from "./typings/Config"
+import * as FS from "fs-extra"
+import * as PATH from "path"
 import {
   CLIENT_NAV_JSON_RELATIVE_PATH,
   CLIENT_CATEGORY_RELATIVE_PATH
-} from "./constants/path";
-import { outputJSONSync } from "fs-extra";
-import { ClientNavCategory } from "./typings/ClientNavCategory";
+} from "./constants/path"
+import { outputJSONSync } from "fs-extra"
+import { ClientNavCategory } from "./typings/ClientNavCategory"
 import {
   NEWEST_BLOGS,
   CATEGORY,
@@ -40,507 +40,551 @@ import {
   CREATE_TIME,
   INTRODUCTION,
   NAME_PATH
-} from "./constants/names";
-import { ClientNavBlog } from "./typings/ClientNavBlog";
-import { BlogProps } from "./typings/BlogProps";
-import { BlogInfo } from "./typings/BlogInfo";
-import { ClientTag } from "./typings/ClientTag";
-import { CLIENT_NAV_TAGS_DIRECTORY_PATH } from "./constants/path";
+} from "./constants/names"
+import { ClientNavBlog } from "./typings/ClientNavBlog"
+import { BlogProps } from "./typings/BlogProps"
+import { BlogInfo } from "./typings/BlogInfo"
+import { ClientTag } from "./typings/ClientTag"
+import { CLIENT_NAV_TAGS_DIRECTORY_PATH } from "./constants/path"
 import {
   RELATIVE_CLIENT_URL,
   DOT_HTML,
   INSERTED_SCRIPTS,
   MARKED_HTML
-} from "./constants/names";
-import { ClientCategory } from "./typings/ClientCategory";
-import { readFileSync } from "./utils/fs";
-import * as marked from "marked";
-import getBlogDetailHtml from "./constants/dynamic/getBlogDetailHtml";
-import { CONFIG } from './constants/names';
-var Ajv = require("ajv");
-var ajv = new Ajv();
+} from "./constants/names"
+import { ClientCategory } from "./typings/ClientCategory"
+import { readFileSync } from "./utils/fs"
+import * as marked from "marked"
+import getBlogDetailHtml from "./constants/dynamic/getBlogDetailHtml"
+import { CONFIG, ALL_BLOGS } from "./constants/names"
+var Ajv = require( "ajv" )
+var ajv = new Ajv()
 
-const dirTree = require("directory-tree");
+const dirTree = require( "directory-tree" )
 
 export class Store {
-  root: string;
-  output: string;
-  config: Config = DEFAULT_CONFIG;
-  blogsInfo: BlogInfo[] = [];
+  root: string
+  output: string
+  config: Config = DEFAULT_CONFIG
+  blogsInfo: BlogInfo[] = []
 }
 
 export class Getters {
-  store: Store;
+  store: Store
 
-  blogBuilder: BlogBuilder;
+  blogBuilder: BlogBuilder
 
-  constructor(store: Store, blogBuilder: BlogBuilder) {
-    this.store = store;
-    this.blogBuilder = blogBuilder;
+  constructor( store: Store, blogBuilder: BlogBuilder ) {
+    this.store = store
+    this.blogBuilder = blogBuilder
   }
 
   get rootDirectoryName() {
-    const { root } = this.store;
-    return PATH.basename(root);
+    const { root } = this.store
+    return PATH.basename( root )
   }
 
   get utilGetters(): UtilGetters {
-    return this.blogBuilder.utilGetters;
+    return this.blogBuilder.utilGetters
   }
 
   get category(): Category {
-    const self = this;
-    const { utilGetters, store } = this;
-    const { root, config, blogsInfo } = store;
+    const self = this
+    const { utilGetters, store } = this
+    const { root, config, blogsInfo } = store
 
-    const { [TOP_DIRECTORY_NAME]: topDirectoryName } = config;
+    const { [ TOP_DIRECTORY_NAME ]: topDirectoryName } = config
 
     let res: Category = {
-      [NAME]: topDirectoryName,
-      [BLOGS]: blogsInfo,
-      [CATEGORIES]: []
-    };
+      [ NAME ]      : topDirectoryName,
+      [ BLOGS ]     : this.getBlogsInfo( root ),
+      [ ALL_BLOGS ] : this.getAllBlogsInfo( root ),
+      [ CATEGORIES ]: []
+    }
 
-    resolveRoot(root);
+    resolveRoot( root )
 
-    return res;
+    return res
 
-    function resolveRoot(path: string) {
-      const directoryInfo = dirTree(path);
+    function resolveRoot( path: string ) {
+      const directoryInfo = dirTree( path )
 
-      if (directoryInfo) {
-        const { type } = directoryInfo;
-        const { [CATEGORIES]: passingCategories } = res;
-        isDirectoryType(type) &&
-          resolveDirectoryInfo(directoryInfo, passingCategories);
+      if ( directoryInfo ) {
+        const { type } = directoryInfo
+        const { [ CATEGORIES ]: passingCategories } = res
+        isDirectoryType( type ) &&
+          resolveDirectoryInfo( directoryInfo, passingCategories, true )
       }
     }
 
     function resolveDirectoryInfo(
       directoryInfo: any,
-      paramPassingCategories?: Category[]
+      paramPassingCategories?: Category[],
+      isRoot: boolean = false
     ) {
-      const { name } = directoryInfo;
+      const { name } = directoryInfo
 
-      let passingCategories: Category[] = [];
+      let passingCategories: Category[] = []
 
-      const isTheBlogDirectoryInfo = isBlogDirectoryInfo(directoryInfo);
+      const isTheBlogDirectoryInfo = isBlogDirectoryInfo( directoryInfo )
 
-      if (!isTheBlogDirectoryInfo) {
-        const { children, name, path } = directoryInfo;
+      if ( !isTheBlogDirectoryInfo ) {
+        const { children, name, path } = directoryInfo
 
-        paramPassingCategories.push({
-          [NAME]: name,
-          [BLOGS]: self.getBlogsInfo(path),
-          [CATEGORIES]: passingCategories
-        });
+        if ( isRoot ) {
+          passingCategories = paramPassingCategories
+        }
+
+        !isRoot &&
+          paramPassingCategories.push( {
+            [ NAME ]      : name,
+            [ BLOGS ]     : self.getBlogsInfo( path ),
+            [ ALL_BLOGS ] : self.getAllBlogsInfo( path ),
+            [ CATEGORIES ]: passingCategories
+          } )
 
         children
-          .filter(filterIsDirectoryType)
-          .map((directoryInfo: any) =>
-            resolveDirectoryInfo(directoryInfo, passingCategories)
-          );
+          .filter( filterIsDirectoryType )
+          .map( ( directoryInfo: any ) =>
+            resolveDirectoryInfo( directoryInfo, passingCategories )
+          )
       }
     }
   }
 
   get tags(): Tag[] {
-    let res: Tag[] = [];
-    let excessiveRes: Tag[] = [];
+    let res: Tag[] = []
+    let excessiveRes: Tag[] = []
 
-    const { blogsInfo } = this.store;
+    const { blogsInfo } = this.store
 
-    blogsInfo.map(updateExcessiveRes);
+    blogsInfo.map( updateExcessiveRes )
 
-    return res;
+    return res
 
-    function updateExcessiveRes(blogInfo: BlogInfo) {
-      const { [TAGS]: tags } = blogInfo;
+    function updateExcessiveRes( blogInfo: BlogInfo ) {
+      const { [ TAGS ]: tags } = blogInfo
 
-      tags.map((tagString: string) => {
+      tags.map( ( tagString: string ) => {
         let tagInRes: Tag = res.filter(
-          ({ [NAME]: theName }: Tag) => theName === tagString
-        )[0];
+          ( { [ NAME ]: theName }: Tag ) => theName === tagString
+        )[ 0 ]
 
-        if (tagInRes) {
-          tagInRes[BLOGS] = [...tagInRes[BLOGS], blogInfo];
+        if ( tagInRes ) {
+          tagInRes[ BLOGS ] = [ ...tagInRes[ BLOGS ], blogInfo ]
         }
-        if (!tagInRes) {
+        if ( !tagInRes ) {
           const tag: Tag = {
-            [NAME]: tagString,
-            [BLOGS]: [blogInfo]
-          };
-          res.push(tag);
+            [ NAME ] : tagString,
+            [ BLOGS ]: [ blogInfo ]
+          }
+          res.push( tag )
         }
-      });
+      } )
     }
   }
 
   get clientNavNewestBlogs(): ClientNavBlog[] {
-    const { blogsInfo, config } = this.store;
+    const { blogsInfo, config } = this.store
     const {
-      [NAME_NEWEST_BLOGS_COUNT]: count,
-      [TOP_DIRECTORY_NAME]: topDirectoryName
-    } = config;
+      [ NAME_NEWEST_BLOGS_COUNT ]: count,
+      [ TOP_DIRECTORY_NAME ]: topDirectoryName
+    } = config
     const all: ClientNavBlog[] = blogsInfo
       .map(
-        ({
-          [NAME_PATH]: blogPath,
-          [RELATIVE_CLIENT_URL]: relativeClientUrl,
-          [NAME]: name,
-          [CREATE_TIME]: createTime,
-          [INTRODUCTION]: introduction
-        }) => ({
-          [NAME]: name,
-          [RELATIVE_CLIENT_URL]: relativeClientUrl,
-          [CREATE_TIME]: createTime,
-          [INTRODUCTION]: introduction
-        })
+        ( {
+          [ NAME_PATH ]: blogPath,
+          [ RELATIVE_CLIENT_URL ]: relativeClientUrl,
+          [ NAME ]: name,
+          [ CREATE_TIME ]: createTime,
+          [ INTRODUCTION ]: introduction
+        } ) => ( {
+          [ NAME ]               : name,
+          [ RELATIVE_CLIENT_URL ]: relativeClientUrl,
+          [ CREATE_TIME ]        : createTime,
+          [ INTRODUCTION ]       : introduction
+        } )
       )
-      .sort(sort);
+      .sort( sort )
 
-    const res: ClientNavBlog[] = take(all, count);
-    return res;
+    const res: ClientNavBlog[] = take( all, count )
+    return res
 
     function sort(
-      { [CREATE_TIME]: timeString1 }: ClientNavBlog,
-      { [CREATE_TIME]: timeString2 }: ClientNavBlog
+      { [ CREATE_TIME ]: timeString1 }: ClientNavBlog,
+      { [ CREATE_TIME ]: timeString2 }: ClientNavBlog
     ) {
-      if (isValidDateString(timeString1) && isValidDateString(timeString2)) {
-        const t1 = Date.parse(timeString1);
-        const t2 = Date.parse(timeString2);
-        return t1 - t2;
+      if ( isValidDateString( timeString1 ) && isValidDateString( timeString2 ) ) {
+        const t1 = Date.parse( timeString1 )
+        const t2 = Date.parse( timeString2 )
+        return t1 - t2
       }
-      return 0;
+      return 0
     }
   }
 
   get clientNavCategory(): ClientNavCategory {
-    const { category } = this;
-    let res: any = cloneDeep(category);
-    resolveCategory(res);
-    recurCategories(res[CATEGORIES]);
+    const { category } = this
+    let res: any = cloneDeep( category )
+    resolveCategory( res )
+    recurCategories( res[ CATEGORIES ] )
 
-    return res;
+    return res
 
-    function recurCategories(categories: Category[]) {
-      categories.map(category => {
-        resolveCategory(category);
-        recurCategories(category[CATEGORIES]);
-      });
+    function recurCategories( categories: Category[] ) {
+      categories.map( category => {
+        resolveCategory( category )
+        recurCategories( category[ CATEGORIES ] )
+      } )
     }
 
-    function resolveCategory(category: Category) {
-      delete category[BLOGS];
+    function resolveCategory( category: Category ) {
+      delete category[ BLOGS ]
+      delete category[ ALL_BLOGS ]
     }
   }
 
   get clientNavTags(): string[] {
-    return this.tags.map(({ [NAME]: name }: Tag) => name);
+    return this.tags.map( ( { [ NAME ]: name }: Tag ) => name )
   }
 
   get clientNav(): ClientNav {
-    const { clientNavNewestBlogs, clientNavCategory, clientNavTags } = this;
+    const { clientNavNewestBlogs, clientNavCategory, clientNavTags } = this
     return {
-      [NEWEST_BLOGS]: clientNavNewestBlogs,
-      [CATEGORY]: clientNavCategory,
-      [TAGS]: clientNavTags
-    };
+      [ NEWEST_BLOGS ]: clientNavNewestBlogs,
+      [ CATEGORY ]    : clientNavCategory,
+      [ TAGS ]        : clientNavTags
+    }
   }
 
   get clientCategory(): ClientCategory {
-    const { category } = this;
-    let res: any = cloneDeep(category);
-    resolveCategory(res);
-    recurCategories(res[CATEGORIES]);
+    const { category } = this
+    let res: any = cloneDeep( category )
+    resolveCategory( res )
+    recurCategories( res[ CATEGORIES ] )
 
-    return res;
+    return res
 
-    function recurCategories(categories: Category[]) {
-      categories.map(category => {
-        resolveCategory(category);
-        recurCategories(category[CATEGORIES]);
-      });
+    function recurCategories( categories: Category[] ) {
+      categories.map( category => {
+        resolveCategory( category )
+        recurCategories( category[ CATEGORIES ] )
+      } )
     }
 
-    function resolveCategory(category: Category) {
-      const { [BLOGS]: theBlogs } = category;
-      const blogs = theBlogs.map((theBlog: any) => {
-        delete theBlog[NAME_PATH];
-        delete theBlog[TAGS];
-        return theBlog;
-      });
+    function resolveCategory( category: Category ) {
+      const { [ BLOGS ]: theBlogs } = category
+      const blogs = theBlogs.map( ( theBlog: any ) => {
+        delete theBlog[ NAME_PATH ]
+        delete theBlog[ TAGS ]
+        return theBlog
+      } )
 
-      category[BLOGS] = blogs;
+      category[ BLOGS ] = blogs
     }
   }
 
   get clientTags(): ClientTag[] {
-    const { tags } = this;
-    let res: Tag[] = cloneDeep(tags);
-    res.forEach(resoveTag);
+    const { tags } = this
+    let res: Tag[] = cloneDeep( tags )
+    res.forEach( resoveTag )
 
-    return <ClientTag[]>res;
+    return <ClientTag[]>res
 
-    function resoveTag(tag: Tag) {
-      const { [BLOGS]: theBlogs } = tag;
-      const blogs = theBlogs.map((theBlog: any) => {
-        delete theBlog[NAME_PATH];
-        delete theBlog[TAGS];
-        return theBlog;
-      });
+    function resoveTag( tag: Tag ) {
+      const { [ BLOGS ]: theBlogs } = tag
+      const blogs = theBlogs.map( ( theBlog: any ) => {
+        delete theBlog[ NAME_PATH ]
+        delete theBlog[ TAGS ]
+        return theBlog
+      } )
 
-      tag[BLOGS] = blogs;
+      tag[ BLOGS ] = blogs
     }
   }
 
   get clientNavJsonPath(): string {
-    const { output } = this.store;
-    return PATH.resolve(output, CLIENT_NAV_JSON_RELATIVE_PATH);
+    const { output } = this.store
+    return PATH.resolve( output, CLIENT_NAV_JSON_RELATIVE_PATH )
   }
 
   get clientNavTagsDirectoryPath(): string {
-    const { output } = this.store;
-    return PATH.resolve(output, CLIENT_NAV_TAGS_DIRECTORY_PATH);
+    const { output } = this.store
+    return PATH.resolve( output, CLIENT_NAV_TAGS_DIRECTORY_PATH )
   }
 
-  getBlogsInfo(path: string): BlogInfo[] {
-    const self = this;
-    const { utilGetters } = this;
-    let res: BlogInfo[] = [];
+  getBlogInfo( directoryInfo: any ): BlogInfo {
+    const { utilGetters } = this
+    const isTheBlogDirectoryInfo = isBlogDirectoryInfo( directoryInfo )
 
-    resolveRoot(path);
+    if ( isTheBlogDirectoryInfo ) {
+      const blogPropsFilePath: string = getBlogPropsFilePath( directoryInfo )
+      const potentialBlogProps: any = readJsonFromFile( blogPropsFilePath )
 
-    return res;
+      const isValid = ajv.validate( BLOG_PROPS_SCHEMA, potentialBlogProps )
+      if ( isValid ) {
+        const blogProps: BlogProps = potentialBlogProps
+        const blogPath: string = getBlogFilePath( directoryInfo )
 
-    function resolveRoot(path: string) {
-      const directoryInfo = dirTree(path);
+        const relativeClientUrl = this.getBlogRelativeClientUrl( blogPath )
+        const name: string = notNil( blogProps[ NAME ] ) ?
+          blogProps[ NAME ] :
+          getFileNameWithoutItsExtension( blogPath )
+        const createTime: string = notNil( blogProps[ CREATE_TIME ] ) ?
+          blogProps[ CREATE_TIME ] :
+          null
+        const tags: string[] = notNil( blogProps[ TAGS ] ) ? blogProps[ TAGS ] : []
 
-      if (directoryInfo) {
-        const { type } = directoryInfo;
-        isDirectoryType(type) && resolveDirectoryInfo(directoryInfo);
-      }
-    }
+        const introduction: string = notNil( blogProps[ INTRODUCTION ] ) ?
+          blogProps[ INTRODUCTION ] :
+          utilGetters.getBlogIntroduction( blogPath )
 
-    function resolveDirectoryInfo(directoryInfo: any) {
-      const isTheBlogDirectoryInfo = isBlogDirectoryInfo(directoryInfo);
-
-      if (isTheBlogDirectoryInfo) {
-        const blogPropsFilePath: string = getBlogPropsFilePath(directoryInfo);
-        const potentialBlogProps: any = readJsonFromFile(blogPropsFilePath);
-
-        const isValid = ajv.validate(BLOG_PROPS_SCHEMA, potentialBlogProps);
-        if (isValid) {
-          const blogProps: BlogProps = potentialBlogProps;
-          const blogPath: string = getBlogFilePath(directoryInfo);
-
-          const relativeClientUrl = self.getBlogRelativeClientUrl(blogPath);
-          const name: string = notNil(blogProps[NAME])
-            ? blogProps[NAME]
-            : getFileNameWithoutItsExtension(blogPath);
-          const createTime: string = notNil(blogProps[CREATE_TIME])
-            ? blogProps[CREATE_TIME]
-            : null;
-          const tags: string[] = notNil(blogProps[TAGS]) ? blogProps[TAGS] : [];
-
-          const introduction: string = notNil(blogProps[INTRODUCTION])
-            ? blogProps[INTRODUCTION]
-            : utilGetters.getBlogIntroduction(blogPath);
-
-          const blogInfo: BlogInfo = {
-            [NAME_PATH]: blogPath,
-            [RELATIVE_CLIENT_URL]: relativeClientUrl,
-            [NAME]: name,
-            [CREATE_TIME]: createTime,
-            [TAGS]: tags,
-            [INTRODUCTION]: introduction
-          };
-
-          res.push(blogInfo);
+        const blogInfo: BlogInfo = {
+          [ NAME_PATH ]          : blogPath,
+          [ RELATIVE_CLIENT_URL ]: relativeClientUrl,
+          [ NAME ]               : name,
+          [ CREATE_TIME ]        : createTime,
+          [ TAGS ]               : tags,
+          [ INTRODUCTION ]       : introduction
         }
+
+        return blogInfo
       }
-      if (!isTheBlogDirectoryInfo) {
-        const { children } = directoryInfo;
-        children.filter(filterIsDirectoryType).map(resolveDirectoryInfo);
+      return null
+    }
+  }
+
+  getBlogsInfo( path: string ): BlogInfo[] {
+    const self = this
+    const { utilGetters } = this
+    let res: BlogInfo[] = []
+
+    resolveRoot( path )
+
+    return res
+
+    function resolveRoot( path: string ) {
+      const directoryInfo = dirTree( path )
+
+      if ( directoryInfo ) {
+        const { children } = directoryInfo
+        children.filter( filterIsDirectoryType ).map( resolveDirectoryInfo )
+      }
+    }
+
+    function resolveDirectoryInfo( directoryInfo: any ) {
+      const blogInfo = self.getBlogInfo( directoryInfo )
+      blogInfo && res.push( blogInfo )
+    }
+  }
+
+  getAllBlogsInfo( path: string ): BlogInfo[] {
+    const self = this
+    const { utilGetters } = this
+    let res: BlogInfo[] = []
+
+    resolveRoot( path )
+
+    return res
+
+    function resolveRoot( path: string ) {
+      const directoryInfo = dirTree( path )
+
+      if ( directoryInfo ) {
+        const { type } = directoryInfo
+        isDirectoryType( type ) && resolveDirectoryInfo( directoryInfo )
+      }
+    }
+
+    function resolveDirectoryInfo( directoryInfo: any ) {
+      const isTheBlogDirectoryInfo = isBlogDirectoryInfo( directoryInfo )
+
+      if ( isTheBlogDirectoryInfo ) {
+        const blogInfo = self.getBlogInfo( directoryInfo )
+        blogInfo && res.push( blogInfo )
+      }
+      if ( !isTheBlogDirectoryInfo ) {
+        const { children } = directoryInfo
+        children.filter( filterIsDirectoryType ).map( resolveDirectoryInfo )
       }
     }
   }
 
-  getBlogRelativeClientUrl(blogPath: string) {
-    const { rootDirectoryName } = this;
+  getBlogRelativeClientUrl( blogPath: string ) {
+    const { rootDirectoryName } = this
 
-    const { config, root } = this.store;
-    const { [TOP_DIRECTORY_NAME]: topDirectoryName } = config;
+    const { config, root } = this.store
+    const { [ TOP_DIRECTORY_NAME ]: topDirectoryName } = config
 
-    const extension: string = PATH.extname(blogPath);
-    const r: RegExp = new RegExp(`${extension}$`);
-    const targetBlogHtmlPath = blogPath.replace(r, DOT_HTML);
+    const extension: string = PATH.extname( blogPath )
+    const r: RegExp = new RegExp( `${extension}$` )
+    const targetBlogHtmlPath = blogPath.replace( r, DOT_HTML )
 
     return `${topDirectoryName}/${rootDirectoryName}/${PATH.relative(
       root,
       targetBlogHtmlPath
-    )}`;
+    )}`
   }
 
-  getBlogRelativeServerUrl(blogPath: string) {
-    const { root } = this.store;
-    return `${PATH.relative(root, blogPath)}`;
+  getBlogRelativeServerUrl( blogPath: string ) {
+    const { root } = this.store
+    return `${PATH.relative( root, blogPath )}`
   }
 
-  getClientTagJsonPath(tagName: string): string {
-    const { clientNavTagsDirectoryPath, utilGetters } = this;
-    const tagJsonFileName = utilGetters.getClientTagJsonFileName(tagName);
-    return PATH.resolve(clientNavTagsDirectoryPath, tagJsonFileName);
+  getClientTagJsonPath( tagName: string ): string {
+    const { clientNavTagsDirectoryPath, utilGetters } = this
+    const tagJsonFileName = utilGetters.getClientTagJsonFileName( tagName )
+    return PATH.resolve( clientNavTagsDirectoryPath, tagJsonFileName )
   }
 
-  getBlogDetailPageHtmlPath(blog: BlogInfo) {
-    const { output } = this.store;
-    const { [RELATIVE_CLIENT_URL]: relativeClientUrl } = blog;
-    return PATH.resolve(output, relativeClientUrl);
+  getBlogDetailPageHtmlPath( blog: BlogInfo ) {
+    const { output } = this.store
+    const { [ RELATIVE_CLIENT_URL ]: relativeClientUrl } = blog
+    return PATH.resolve( output, relativeClientUrl )
   }
 
-  getBlogDetailPageHtml(blog: BlogInfo): string {
-    const { [INSERTED_SCRIPTS]: insertedScripts } = this.store.config;
-    const { [NAME_PATH]: blogPath, [NAME]: blogName } = blog;
-    const string = readFileSync(blogPath);
-    if (string) {
-      const markedHtml = marked(string);
+  getBlogDetailPageHtml( blog: BlogInfo ): string {
+    const { [ INSERTED_SCRIPTS ]: insertedScripts } = this.store.config
+    const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName } = blog
+    const string = readFileSync( blogPath )
+    if ( string ) {
+      const markedHtml = marked( string )
 
-      return getBlogDetailHtml({
-        [NAME]: blogName,
-        [MARKED_HTML]: markedHtml,
-        [INSERTED_SCRIPTS]: insertedScripts
-      });
+      return getBlogDetailHtml( {
+        [ NAME ]            : blogName,
+        [ MARKED_HTML ]     : markedHtml,
+        [ INSERTED_SCRIPTS ]: insertedScripts
+      } )
     }
-    return "";
+    return ""
   }
 }
 
 export class Mutations {
-  store: Store;
-  getters: Getters;
+  store: Store
+  getters: Getters
 
-  constructor(getters: Getters) {
-    this.store = getters.store;
-    this.getters = getters;
+  constructor( getters: Getters ) {
+    this.store = getters.store
+    this.getters = getters
   }
 
-  UPDATE_ROOT(root: string) {
-    this.store.root = root;
+  UPDATE_ROOT( root: string ) {
+    this.store.root = root
   }
 
-  UPDATE_OUTPUT(output: string) {
-    this.store.output = output;
+  UPDATE_OUTPUT( output: string ) {
+    this.store.output = output
   }
 
-  UPDATE_CONFIG(config: Config) {
-    this.store.config = config;
+  UPDATE_CONFIG( config: Config ) {
+    this.store.config = config
   }
 
-  UPDATE_BLOGS_INFO(blogsInfo: BlogInfo[]) {
-    this.store.blogsInfo = blogsInfo;
+  UPDATE_BLOGS_INFO( blogsInfo: BlogInfo[] ) {
+    this.store.blogsInfo = blogsInfo
   }
 }
 
 export class Actions {
-  store: Store;
-  getters: Getters;
-  mutations: Mutations;
+  store: Store
+  getters: Getters
+  mutations: Mutations
 
-  constructor(mutations: Mutations) {
-    this.store = mutations.getters.store;
-    this.getters = mutations.getters;
-    this.mutations = mutations;
+  constructor( mutations: Mutations ) {
+    this.store = mutations.getters.store
+    this.getters = mutations.getters
+    this.mutations = mutations
   }
 
   get utilGetters(): UtilGetters {
-    return this.getters.utilGetters;
+    return this.getters.utilGetters
   }
 
-  build(config?: Config) {
-    const { mutations, store, getters } = this;
-    const { root, [ CONFIG ]: currentConfig } = store;
+  build( config?: Config ) {
+    const { mutations, store, getters } = this
+    const { root, [ CONFIG ]: currentConfig } = store
 
     const combinedConfig = {
       ...currentConfig,
       ...config
     }
-    notNil(config) && mutations.UPDATE_CONFIG(combinedConfig);
+    notNil( config ) && mutations.UPDATE_CONFIG( combinedConfig )
 
-    const blogsInfo: BlogInfo[] = getters.getBlogsInfo(root);
-    mutations.UPDATE_BLOGS_INFO(blogsInfo);
+    const blogsInfo: BlogInfo[] = getters.getBlogsInfo( root )
+    mutations.UPDATE_BLOGS_INFO( blogsInfo )
 
-    this.buildClientNavJson();
-    this.buildCategories();
-    this.buildTags();
-    this.buildBlogDetailPages();
+    this.buildClientNavJson()
+    this.buildCategories()
+    this.buildTags()
+    this.buildBlogDetailPages()
   }
 
   buildClientNavJson() {
-    const { clientNav, clientNavJsonPath } = this.getters;
-    FS.outputJSONSync(clientNavJsonPath, clientNav);
+    const { clientNav, clientNavJsonPath } = this.getters
+    FS.outputJSONSync( clientNavJsonPath, clientNav )
   }
 
   buildCategories() {
-    const { utilGetters } = this;
-    const { output } = this.store;
-    const { clientCategory } = this.getters;
+    const { utilGetters } = this
+    const { output } = this.store
+    const { clientCategory } = this.getters
 
-    outputCategory(clientCategory, output);
+    outputCategory( clientCategory, output )
 
     function outputCategory(
       category: ClientCategory,
       upperDirectoryPath: string
     ) {
       const {
-        [NAME]: name,
-        [BLOGS]: blogs,
-        [CATEGORIES]: categories
-      } = category;
-      const categoryJsonDirectoryPath = PATH.resolve(upperDirectoryPath, name);
+        [ NAME ]: name,
+        [ BLOGS ]: blogs,
+        [ CATEGORIES ]: categories
+      } = category
+      const categoryJsonDirectoryPath = PATH.resolve( upperDirectoryPath, name )
       const outputPath: string = utilGetters.getClientCategoryJsonPath(
         categoryJsonDirectoryPath
-      );
+      )
       const json = {
-        [BLOGS]: blogs
-      };
-      FS.outputJson(outputPath, json);
+        [ BLOGS ]: blogs
+      }
+      FS.outputJson( outputPath, json )
 
-      categories.map((category: Category) =>
-        outputCategory(category, categoryJsonDirectoryPath)
-      );
+      categories.map( ( category: Category ) =>
+        outputCategory( category, categoryJsonDirectoryPath )
+      )
     }
   }
 
   buildTags() {
-    const self = this;
-    const { clientTags } = this.getters;
+    const self = this
+    const { clientTags } = this.getters
 
-    clientTags.map(outputTag);
+    clientTags.map( outputTag )
 
-    function outputTag({ [NAME]: tagName, [BLOGS]: blogs }: ClientTag) {
-      const outputPath = self.getters.getClientTagJsonPath(tagName);
+    function outputTag( { [ NAME ]: tagName, [ BLOGS ]: blogs }: ClientTag ) {
+      const outputPath = self.getters.getClientTagJsonPath( tagName )
       const json = {
-        [BLOGS]: blogs
-      };
-      FS.outputJson(outputPath, json);
+        [ BLOGS ]: blogs
+      }
+      FS.outputJson( outputPath, json )
     }
   }
 
   buildBlogDetailPages() {
-    const self = this;
-    const { getters, store } = this    
-    const { blogsInfo } = store;
-    const { utilGetters } = getters;
+    const self = this
+    const { getters, store } = this
+    const { blogsInfo } = store
+    const { utilGetters } = getters
 
-    blogsInfo.map(output);
+    blogsInfo.map( output )
 
-    function output(blogInfo: BlogInfo) {
-      const outputPath = self.getters.getBlogDetailPageHtmlPath(blogInfo);
-      const html = getters.getBlogDetailPageHtml(blogInfo);
+    function output( blogInfo: BlogInfo ) {
+      const outputPath = self.getters.getBlogDetailPageHtmlPath( blogInfo )
+      const html = getters.getBlogDetailPageHtml( blogInfo )
 
-      if (!utilGetters.isSameFileTextsWithText(outputPath, html)) {
-        FS.outputFileSync(outputPath, html);
+      if ( !utilGetters.isSameFileTextsWithText( outputPath, html ) ) {
+        FS.outputFileSync( outputPath, html )
       }
     }
   }

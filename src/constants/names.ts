@@ -1,5 +1,6 @@
 export const NAME = 'name'
 export const BLOGS = 'blogs'
+export const ALL_BLOGS = 'allBlogs'
 export const NAME_PATH = 'path'
 export const CREATE_TIME = 'createTime'
 export const CATEGORY = 'category'
