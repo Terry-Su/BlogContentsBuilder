@@ -56,7 +56,13 @@ import { ClientCategory } from "./typings/ClientCategory"
 import { readFileSync } from "./utils/fs"
 import * as marked from "marked"
 import getBlogDetailHtml from "./constants/dynamic/getBlogDetailHtml"
-import { CONFIG, ALL_BLOGS } from "./constants/names"
+import {
+  CONFIG,
+  ALL_BLOGS,
+  CLIENT_TEXT_LOGO,
+  CLIENT_IMAGE_LOGO,
+  CLIENT_SLOGAN
+} from "./constants/names"
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
 
@@ -250,10 +256,18 @@ export class Getters {
 
   get clientNav(): ClientNav {
     const { clientNavNewestBlogs, clientNavCategory, clientNavTags } = this
+    const {
+      [ CLIENT_TEXT_LOGO ]: clientTextLogo,
+      [ CLIENT_IMAGE_LOGO ]: clientImageLogo,
+      [ CLIENT_SLOGAN ]: clientSlogan
+    } = this.store.config
     return {
-      [ NEWEST_BLOGS ]: clientNavNewestBlogs,
-      [ CATEGORY ]    : clientNavCategory,
-      [ TAGS ]        : clientNavTags
+      [ NEWEST_BLOGS ]     : clientNavNewestBlogs,
+      [ CATEGORY ]         : clientNavCategory,
+      [ TAGS ]             : clientNavTags,
+      [ CLIENT_TEXT_LOGO ] : clientTextLogo,
+      [ CLIENT_IMAGE_LOGO ]: clientImageLogo,
+      [ CLIENT_SLOGAN ]    : clientSlogan
     }
   }
 
@@ -355,7 +369,7 @@ export class Getters {
   }
 
   /**
-   * Get the info of the blogs whose upper path is the paramater path 
+   * Get the info of the blogs whose upper path is the paramater path
    */
   getBlogsInfo( path: string ): BlogInfo[] {
     const self = this

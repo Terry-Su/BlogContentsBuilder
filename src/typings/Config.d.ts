@@ -1,6 +1,16 @@
-import { TOP_DIRECTORY_NAME, NAME_NEWEST_BLOGS_COUNT, INSERTED_SCRIPTS } from '../constants/names';
+import {
+  TOP_DIRECTORY_NAME,
+  NAME_NEWEST_BLOGS_COUNT,
+  INSERTED_SCRIPTS,
+  CLIENT_TEXT_LOGO,
+  CLIENT_IMAGE_LOGO,
+  CLIENT_SLOGAN
+} from "../constants/names"
 interface Config {
-  [ TOP_DIRECTORY_NAME ]: string,
-  [ NAME_NEWEST_BLOGS_COUNT ]: number
-  [ INSERTED_SCRIPTS ]: string[]
+  [TOP_DIRECTORY_NAME]: string
+  [NAME_NEWEST_BLOGS_COUNT]: number
+  [INSERTED_SCRIPTS]: string[]
+  [CLIENT_TEXT_LOGO]: string
+  [CLIENT_IMAGE_LOGO]: string
+  [CLIENT_SLOGAN]: string
 }

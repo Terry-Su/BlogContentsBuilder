@@ -29,3 +29,8 @@ export const INSERTED_SCRIPTS = 'insertedScripts'
 
 
 export const UTF8 = 'utf8'
+
+
+export const CLIENT_TEXT_LOGO = 'clientTextLogo'
+export const CLIENT_IMAGE_LOGO = 'clientImageLogo'
+export const CLIENT_SLOGAN = 'clientSlogan'
