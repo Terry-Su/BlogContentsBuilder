@@ -1,4 +1,5 @@
-import { INSERTED_SCRIPTS, NAME, MARKED_HTML } from "../names";
+import { NAME, MARKED_HTML } from "../names";
+import { INSERTED_SCRIPTS } from '../configNames';
 export default function({
   [NAME]: name,
   [MARKED_HTML]: markedHtml,

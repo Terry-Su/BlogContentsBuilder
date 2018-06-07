@@ -1,5 +1,7 @@
-import { CLIENT_NAV_JSON, CLIENT_CATEGORY_JSON } from './fileNames';
+import { CLIENT_NAV_JSON, CLIENT_CATEGORY_JSON, CLIENT_CONFIG_JSON } from './fileNames';
 import { TAGS } from './names';
+
+export const CLIENT_CONFIG_JSON_RELATIVE_PATH = CLIENT_CONFIG_JSON
 
 export const CLIENT_NAV_JSON_RELATIVE_PATH = CLIENT_NAV_JSON
 
