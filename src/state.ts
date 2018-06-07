@@ -12,7 +12,7 @@ import getFileNameWithoutItsExtension from "./utils/getFileNameWithoutItsExtensi
 import BLOG_PROPS_SCHEMA from "./constants/schemas/BLOG_PROPS_SCHEMA"
 import readJsonFromFile from "./utils/readJsonFromFile"
 import { isValidDateString } from "./blogBuilderUtils/validate"
-import { isNil, cloneDeep, uniqWith, take } from "lodash"
+import { isNil, cloneDeep, uniqWith, take, mapValues } from "lodash"
 import { DEFAULT_CONFIG } from "./constants/default/index"
 import BlogBuilder from "./BlogBuilder"
 import UtilGetters from "./blogBuilderUtils/UtilGetters"
@@ -32,11 +32,9 @@ import {
   NEWEST_BLOGS,
   CATEGORY,
   TAGS,
-  TOP_DIRECTORY_NAME,
   NAME,
   BLOGS,
   CATEGORIES,
-  NAME_NEWEST_BLOGS_COUNT,
   CREATE_TIME,
   INTRODUCTION,
   NAME_PATH
@@ -45,24 +43,20 @@ import { ClientNavBlog } from "./typings/ClientNavBlog"
 import { BlogProps } from "./typings/BlogProps"
 import { BlogInfo } from "./typings/BlogInfo"
 import { ClientTag } from "./typings/ClientTag"
-import { CLIENT_NAV_TAGS_DIRECTORY_PATH } from "./constants/path"
 import {
-  RELATIVE_CLIENT_URL,
-  DOT_HTML,
-  INSERTED_SCRIPTS,
-  MARKED_HTML
-} from "./constants/names"
+  CLIENT_NAV_TAGS_DIRECTORY_PATH,
+  CLIENT_CONFIG_JSON_RELATIVE_PATH
+} from "./constants/path"
+import { RELATIVE_CLIENT_URL, DOT_HTML, MARKED_HTML } from "./constants/names"
 import { ClientCategory } from "./typings/ClientCategory"
 import { readFileSync } from "./utils/fs"
 import * as marked from "marked"
 import getBlogDetailHtml from "./constants/dynamic/getBlogDetailHtml"
-import {
-  CONFIG,
-  ALL_BLOGS,
-  CLIENT_TEXT_LOGO,
-  CLIENT_IMAGE_LOGO,
-  CLIENT_SLOGAN
-} from "./constants/names"
+import { CONFIG } from "./constants/names"
+import { ALL_BLOGS } from "./constants/names"
+import { NAME_NEWEST_BLOGS_COUNT, TOP_DIRECTORY_NAME, INSERTED_SCRIPTS } from './constants/configNames';
+import * as CONFIG_NAMES_COLLECTION from "./constants/configNames"
+
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
 
@@ -190,6 +184,22 @@ export class Getters {
     }
   }
 
+  get clientConfig(): any {
+    let res: any = {
+      ...this.store.config
+    }
+
+    removeResKeys( res,  CONFIG_NAMES_COLLECTION )    
+
+    return res
+
+    function removeResKeys( res: any = {}, object: any = {} ) {
+      mapValues( object, ( key: string ) => {
+        delete res[ key ]
+      } )
+    }
+  }
+
   get clientNavNewestBlogs(): ClientNavBlog[] {
     const { blogsInfo, config } = this.store
     const {
@@ -256,18 +266,10 @@ export class Getters {
 
   get clientNav(): ClientNav {
     const { clientNavNewestBlogs, clientNavCategory, clientNavTags } = this
-    const {
-      [ CLIENT_TEXT_LOGO ]: clientTextLogo,
-      [ CLIENT_IMAGE_LOGO ]: clientImageLogo,
-      [ CLIENT_SLOGAN ]: clientSlogan
-    } = this.store.config
     return {
-      [ NEWEST_BLOGS ]     : clientNavNewestBlogs,
-      [ CATEGORY ]         : clientNavCategory,
-      [ TAGS ]             : clientNavTags,
-      [ CLIENT_TEXT_LOGO ] : clientTextLogo,
-      [ CLIENT_IMAGE_LOGO ]: clientImageLogo,
-      [ CLIENT_SLOGAN ]    : clientSlogan
+      [ NEWEST_BLOGS ]: clientNavNewestBlogs,
+      [ CATEGORY ]    : clientNavCategory,
+      [ TAGS ]        : clientNavTags
     }
   }
 
@@ -315,6 +317,11 @@ export class Getters {
 
       tag[ BLOGS ] = blogs
     }
+  }
+
+  get clientConfigJsonPath(): string {
+    const { output } = this.store
+    return PATH.resolve( output, CLIENT_CONFIG_JSON_RELATIVE_PATH )
   }
 
   get clientNavJsonPath(): string {
@@ -531,10 +538,16 @@ export class Actions {
     const blogsInfo: BlogInfo[] = getters.getAllBlogsInfo( root )
     mutations.UPDATE_BLOGS_INFO( blogsInfo )
 
+    this.buildConfigJson()
     this.buildClientNavJson()
     this.buildCategories()
     this.buildTags()
     this.buildBlogDetailPages()
+  }
+
+  buildConfigJson() {
+    const { clientConfig, clientConfigJsonPath } = this.getters
+    FS.outputJSONSync( clientConfigJsonPath, clientConfig )
   }
 
   buildClientNavJson() {
