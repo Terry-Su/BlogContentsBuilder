@@ -435,8 +435,6 @@ export class Getters {
   }
 
   getBlogRelativeClientUrl( blogPath: string ) {
-    const { rootDirectoryName } = this
-
     const { config, root } = this.store
     const { [ TOP_DIRECTORY_NAME ]: topDirectoryName } = config
 
@@ -444,7 +442,7 @@ export class Getters {
     const r: RegExp = new RegExp( `${extension}$` )
     const targetBlogHtmlPath = blogPath.replace( r, DOT_HTML )
 
-    return `${topDirectoryName}/${rootDirectoryName}/${PATH.relative(
+    return `${topDirectoryName}/${PATH.relative(
       root,
       targetBlogHtmlPath
     )}`
