@@ -20,9 +20,9 @@ export default function({
   <title>${name}</title>
 </head>
 <body>
-  <div id="app"></div>
+  <div id="app">${markedHtml}</div>
 
-  ${markedHtml}
+  
 
   ${insertedScriptsString}
 </body>
