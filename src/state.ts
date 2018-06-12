@@ -243,7 +243,7 @@ export class Getters {
       if ( isValidDateString( timeString1 ) && isValidDateString( timeString2 ) ) {
         const t1 = Date.parse( timeString1 )
         const t2 = Date.parse( timeString2 )
-        return t1 - t2
+        return t2 - t1
       }
       return 0
     }
