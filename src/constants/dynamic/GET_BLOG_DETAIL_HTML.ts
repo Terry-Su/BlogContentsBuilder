@@ -1,10 +1,9 @@
-import { NAME, MARKED_HTML, RELATIVE_CLIENT_PROPS_URL, PROPS_URL } from '../names';
+import { NAME, MARKED_HTML } from '../names';
 import { INSERTED_SCRIPTS } from "../configNames"
 export default function( {
   [ NAME ]: name,
   [ MARKED_HTML ]: markedHtml,
   [ INSERTED_SCRIPTS ]: insertedScripts,
-  [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl
 }: any ) {
 
   let insertedScriptsString = ""
@@ -13,7 +12,6 @@ export default function( {
   } )
 
   const GV = {
-    [ PROPS_URL ]: relativeClientPropsUrl
   }
   const GVJsonString = JSON.stringify( GV )
 
