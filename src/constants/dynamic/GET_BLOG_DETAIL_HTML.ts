@@ -1,14 +1,21 @@
-import { NAME, MARKED_HTML } from "../names";
-import { INSERTED_SCRIPTS } from '../configNames';
-export default function({
-  [NAME]: name,
-  [MARKED_HTML]: markedHtml,
-  [INSERTED_SCRIPTS]: insertedScripts
-}: any) {
-  let insertedScriptsString = ''
+import { NAME, MARKED_HTML, RELATIVE_CLIENT_PROPS_URL, PROPS_URL } from '../names';
+import { INSERTED_SCRIPTS } from "../configNames"
+export default function( {
+  [ NAME ]: name,
+  [ MARKED_HTML ]: markedHtml,
+  [ INSERTED_SCRIPTS ]: insertedScripts,
+  [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl
+}: any ) {
+
+  let insertedScriptsString = ""
   insertedScripts.map( ( scriptString: string ) => {
     insertedScriptsString = insertedScriptsString + scriptString
   } )
+
+  const GV = {
+    [ PROPS_URL ]: relativeClientPropsUrl
+  }
+  const GVJsonString = JSON.stringify( GV )
 
   return `
 <!DOCTYPE html>
@@ -24,9 +31,9 @@ export default function({
   <div id="app"></div>
 
   
-
+  <script>window.GV=${ GVJsonString }</script>
   ${insertedScriptsString}
 </body>
 </html>
-`;
+`
 }

@@ -57,7 +57,7 @@ import { ClientCategory } from "./typings/ClientCategory"
 import { readFileSync } from "./utils/fs"
 import * as marked from "marked"
 import GET_BLOG_DETAIL_HTML from "./constants/dynamic/GET_BLOG_DETAIL_HTML"
-import { CONFIG } from "./constants/names"
+import { CONFIG, RELATIVE_CLIENT_PROPS_URL } from './constants/names';
 import { ALL_BLOGS } from "./constants/names"
 import {
   NAME_NEWEST_BLOGS_COUNT,
@@ -361,6 +361,7 @@ export class Getters {
         const blogPath: string = getBlogFilePath( directoryInfo )
 
         const relativeClientUrl = this.getBlogRelativeClientUrl( blogPath )
+        const relativeClientPropsUrl = this.getBlogRelativeClientPropsUrl( blogPath )
         const name: string = notNil( blogProps[ NAME ] ) ?
           blogProps[ NAME ] :
           getFileNameWithoutItsExtension( blogPath )
@@ -377,6 +378,7 @@ export class Getters {
         const blogInfo: BlogInfo = {
           [ NAME_PATH ]          : blogPath,
           [ RELATIVE_CLIENT_URL ]: relativeClientUrl,
+          [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl,
           [ NAME ]               : name,
           [ CREATE_TIME ]        : createTime,
           [ CATEGORY_SEQUENCE ]  : categorySequence,
@@ -460,6 +462,15 @@ export class Getters {
     return `${topDirectoryName}/${PATH.relative( root, targetBlogHtmlPath )}`
   }
 
+  getBlogRelativeClientPropsUrl( blogPath: string ) {
+    const { config, root } = this.store
+    const { [ TOP_DIRECTORY_NAME ]: topDirectoryName } = config
+    const upperPath = PATH.resolve( blogPath, '../' )
+    const targetPath = PATH.resolve( upperPath, CLIENT_BLOG_PROPS_JSON  )
+
+    return `${topDirectoryName}/${PATH.relative( root, targetPath )}`
+  }
+
 
   getClientTagJsonPath( tagName: string ): string {
     const { clientNavTagsDirectoryPath, utilGetters } = this
@@ -472,17 +483,14 @@ export class Getters {
     return PATH.resolve( output, relativeClientUrl )
   }
 
-  getClientBlogPropsJsonPath( relativeClientUrl: string ): string {
+  getClientBlogPropsJsonPath( relativeClientPropsUrl: string ): string {
     const { output } = this.store
-    const blogHtmlPath = PATH.resolve( output, relativeClientUrl )
-    const upperPath = PATH.resolve( blogHtmlPath, '../' )
-    const targetPath = PATH.resolve( upperPath, CLIENT_BLOG_PROPS_JSON  )
-    return targetPath 
+    return PATH.resolve( output, relativeClientPropsUrl )
   }
 
   getBlogDetailPageHtml( blog: BlogInfo ): string {
     const { [ INSERTED_SCRIPTS ]: insertedScripts } = this.store.config
-    const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName } = blog
+    const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName, [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl } = blog
     const string = readFileSync( blogPath )
     if ( string ) {
       const markedHtml = marked( string )
@@ -490,7 +498,8 @@ export class Getters {
       return GET_BLOG_DETAIL_HTML( {
         [ NAME ]            : blogName,
         [ MARKED_HTML ]     : markedHtml,
-        [ INSERTED_SCRIPTS ]: insertedScripts
+        [ INSERTED_SCRIPTS ]: insertedScripts,
+        [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl 
       } )
     }
     return ""
@@ -625,22 +634,23 @@ export class Actions {
     blogsInfo.map( output )
 
     function output( blogInfo: BlogInfo ) {
-      const { [RELATIVE_CLIENT_URL]: relativeClientUrl } = blogInfo
-      const outputPath = self.getters.getBlogDetailPageHtmlPath( relativeClientUrl )
-      const html = getters.getBlogDetailPageHtml( blogInfo )
+      const { [RELATIVE_CLIENT_URL]: relativeClientUrl, [RELATIVE_CLIENT_PROPS_URL]: relativeClientPropsUrl } = blogInfo
+      
 
       /**
        * Build html
        */
-      if ( !utilGetters.isSameFileTextsWithText( outputPath, html ) ) {
-        FS.outputFileSync( outputPath, html )
+      const outputHtmlPath = self.getters.getBlogDetailPageHtmlPath( relativeClientUrl )
+      const html = getters.getBlogDetailPageHtml( blogInfo )
+      if ( !utilGetters.isSameFileTextsWithText( outputHtmlPath, html ) ) {
+        FS.outputFileSync( outputHtmlPath, html )
       }
 
       /**
        * Build props.json
        */
       const clientBlogProps = utilGetters.getClientBlogPropsBy( blogInfo )
-      const clientBlogPropsJsonPath = getters.getClientBlogPropsJsonPath( relativeClientUrl )
+      const clientBlogPropsJsonPath = getters.getClientBlogPropsJsonPath( relativeClientPropsUrl )
       FS.outputJSONSync( clientBlogPropsJsonPath, clientBlogProps )
     }
   }
