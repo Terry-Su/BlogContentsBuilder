@@ -47,15 +47,25 @@ import {
   CLIENT_NAV_TAGS_DIRECTORY_PATH,
   CLIENT_CONFIG_JSON_RELATIVE_PATH
 } from "./constants/path"
-import { RELATIVE_CLIENT_URL, DOT_HTML, MARKED_HTML } from "./constants/names"
+import {
+  RELATIVE_CLIENT_URL,
+  DOT_HTML,
+  MARKED_HTML,
+  CATEGORY_SEQUENCE
+} from "./constants/names"
 import { ClientCategory } from "./typings/ClientCategory"
 import { readFileSync } from "./utils/fs"
 import * as marked from "marked"
-import getBlogDetailHtml from "./constants/dynamic/getBlogDetailHtml"
+import GET_BLOG_DETAIL_HTML from "./constants/dynamic/GET_BLOG_DETAIL_HTML"
 import { CONFIG } from "./constants/names"
 import { ALL_BLOGS } from "./constants/names"
-import { NAME_NEWEST_BLOGS_COUNT, TOP_DIRECTORY_NAME, INSERTED_SCRIPTS } from './constants/configNames';
+import {
+  NAME_NEWEST_BLOGS_COUNT,
+  TOP_DIRECTORY_NAME,
+  INSERTED_SCRIPTS
+} from "./constants/configNames"
 import * as CONFIG_NAMES_COLLECTION from "./constants/configNames"
+import { CLIENT_BLOG_PROPS_JSON } from "./constants/fileNames";
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -189,7 +199,7 @@ export class Getters {
       ...this.store.config
     }
 
-    removeResKeys( res,  CONFIG_NAMES_COLLECTION )    
+    removeResKeys( res, CONFIG_NAMES_COLLECTION )
 
     return res
 
@@ -335,7 +345,10 @@ export class Getters {
   }
 
   getBlogInfo( directoryInfo: any ): BlogInfo {
+    const { root, config } = this.store
     const { utilGetters } = this
+    const { [ TOP_DIRECTORY_NAME ]: topDirectoryName } = config
+
     const isTheBlogDirectoryInfo = isBlogDirectoryInfo( directoryInfo )
 
     if ( isTheBlogDirectoryInfo ) {
@@ -354,6 +367,7 @@ export class Getters {
         const createTime: string = notNil( blogProps[ CREATE_TIME ] ) ?
           blogProps[ CREATE_TIME ] :
           null
+        const categorySequence: string[] = utilGetters.getCategorySequenceBy( blogPath, root, topDirectoryName  )
         const tags: string[] = notNil( blogProps[ TAGS ] ) ? blogProps[ TAGS ] : []
 
         const introduction: string = notNil( blogProps[ INTRODUCTION ] ) ?
@@ -365,8 +379,9 @@ export class Getters {
           [ RELATIVE_CLIENT_URL ]: relativeClientUrl,
           [ NAME ]               : name,
           [ CREATE_TIME ]        : createTime,
-          [ TAGS ]               : tags,
-          [ INTRODUCTION ]       : introduction
+          [ CATEGORY_SEQUENCE ]  : categorySequence,
+          [ TAGS ]        : tags,
+          [ INTRODUCTION ]: introduction
         }
 
         return blogInfo
@@ -442,16 +457,9 @@ export class Getters {
     const r: RegExp = new RegExp( `${extension}$` )
     const targetBlogHtmlPath = blogPath.replace( r, DOT_HTML )
 
-    return `${topDirectoryName}/${PATH.relative(
-      root,
-      targetBlogHtmlPath
-    )}`
+    return `${topDirectoryName}/${PATH.relative( root, targetBlogHtmlPath )}`
   }
 
-  getBlogRelativeServerUrl( blogPath: string ) {
-    const { root } = this.store
-    return `${PATH.relative( root, blogPath )}`
-  }
 
   getClientTagJsonPath( tagName: string ): string {
     const { clientNavTagsDirectoryPath, utilGetters } = this
@@ -459,10 +467,17 @@ export class Getters {
     return PATH.resolve( clientNavTagsDirectoryPath, tagJsonFileName )
   }
 
-  getBlogDetailPageHtmlPath( blog: BlogInfo ) {
+  getBlogDetailPageHtmlPath( relativeClientUrl: string ) {
     const { output } = this.store
-    const { [ RELATIVE_CLIENT_URL ]: relativeClientUrl } = blog
     return PATH.resolve( output, relativeClientUrl )
+  }
+
+  getClientBlogPropsJsonPath( relativeClientUrl: string ): string {
+    const { output } = this.store
+    const blogHtmlPath = PATH.resolve( output, relativeClientUrl )
+    const upperPath = PATH.resolve( blogHtmlPath, '../' )
+    const targetPath = PATH.resolve( upperPath, CLIENT_BLOG_PROPS_JSON  )
+    return targetPath 
   }
 
   getBlogDetailPageHtml( blog: BlogInfo ): string {
@@ -472,7 +487,7 @@ export class Getters {
     if ( string ) {
       const markedHtml = marked( string )
 
-      return getBlogDetailHtml( {
+      return GET_BLOG_DETAIL_HTML( {
         [ NAME ]            : blogName,
         [ MARKED_HTML ]     : markedHtml,
         [ INSERTED_SCRIPTS ]: insertedScripts
@@ -480,6 +495,8 @@ export class Getters {
     }
     return ""
   }
+
+  
 }
 
 export class Mutations {
@@ -608,12 +625,23 @@ export class Actions {
     blogsInfo.map( output )
 
     function output( blogInfo: BlogInfo ) {
-      const outputPath = self.getters.getBlogDetailPageHtmlPath( blogInfo )
+      const { [RELATIVE_CLIENT_URL]: relativeClientUrl } = blogInfo
+      const outputPath = self.getters.getBlogDetailPageHtmlPath( relativeClientUrl )
       const html = getters.getBlogDetailPageHtml( blogInfo )
 
+      /**
+       * Build html
+       */
       if ( !utilGetters.isSameFileTextsWithText( outputPath, html ) ) {
         FS.outputFileSync( outputPath, html )
       }
+
+      /**
+       * Build props.json
+       */
+      const clientBlogProps = utilGetters.getClientBlogPropsBy( blogInfo )
+      const clientBlogPropsJsonPath = getters.getClientBlogPropsJsonPath( relativeClientUrl )
+      FS.outputJSONSync( clientBlogPropsJsonPath, clientBlogProps )
     }
   }
 }

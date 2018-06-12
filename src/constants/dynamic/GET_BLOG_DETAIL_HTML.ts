@@ -20,7 +20,8 @@ export default function({
   <title>${name}</title>
 </head>
 <body>
-  <div id="app">${markedHtml}</div>
+  <div id="markedHtml" style="display: none;">${markedHtml}</div>
+  <div id="app"></div>
 
   
 
