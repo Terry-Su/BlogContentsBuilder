@@ -1,4 +1,4 @@
-export const NAV_HTML_TITLE = 'navHtmlTitle'
+export const NAV_HTML_TITLE = 'navTitle'
 
 export const TOP_DIRECTORY_NAME = 'topDirectoryName'
 
