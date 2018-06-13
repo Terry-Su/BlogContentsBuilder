@@ -57,17 +57,21 @@ import {
 import { ClientCategory } from "./typings/ClientCategory"
 import { readFileSync } from "./utils/fs"
 import * as marked from "marked"
-import GET_BLOG_DETAIL_HTML from "./constants/dynamic/GET_BLOG_DETAIL_HTML"
-import { CONFIG,CLIENT_CONFIG, RELATIVE_CLIENT_PROPS_URL } from './constants/names';
-import { ALL_BLOGS } from "./constants/names"
+import {
+  CONFIG,
+  CLIENT_CONFIG,
+  RELATIVE_CLIENT_PROPS_URL
+} from "./constants/names"
+import { ALL_BLOGS, NAV } from './constants/names';
 import {
   NAME_NEWEST_BLOGS_COUNT,
   TOP_DIRECTORY_NAME,
   NAV_HTML_TITLE
 } from "./constants/configNames"
 import * as CONFIG_NAMES_COLLECTION from "./constants/configNames"
-import { CLIENT_BLOG_PROPS_JSON } from "./constants/fileNames";
-import { DETAIL_SCRIPTS, NAV_SCRIPTS } from './constants/configNames';
+import { CLIENT_BLOG_PROPS_JSON } from "./constants/fileNames"
+import { DETAIL_SCRIPTS, NAV_SCRIPTS } from "./constants/configNames"
+import { ClientBlogProps } from "./typings/ClientBlogProps";
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -196,27 +200,24 @@ export class Getters {
     }
   }
 
-
   get clientNavHtml(): string {
-    const { [NAV_HTML_TITLE]: title, [ NAV_SCRIPTS ]: scripts, } = this.store.config
     const {
-      [ CLIENT_CONFIG ]: clientConfig,
-      [ CLIENT_NAV ]: clientNav
-    } = this
-
-
+      [ NAV_HTML_TITLE ]: title,
+      [ NAV_SCRIPTS ]: scripts
+    } = this.store.config
+    const { [ CLIENT_CONFIG ]: clientConfig, [ CLIENT_NAV ]: clientNav } = this
 
     let scriptsString = ""
     scripts.map( ( scriptString: string ) => {
       scriptsString = scriptsString + scriptString
     } )
-  
+
     const GV = {
       [ CONFIG ]    : clientConfig,
-      [ CLIENT_NAV ]: clientNav
+      [ NAV ]: clientNav
     }
     const GVJsonString = JSON.stringify( GV )
-  
+
     return `
   <!DOCTYPE html>
   <html lang="en">
@@ -252,7 +253,7 @@ export class Getters {
       } )
     }
   }
-  
+
   get clientNavNewestBlogs(): ClientNavBlog[] {
     const { blogsInfo, config } = this.store
     const {
@@ -374,7 +375,7 @@ export class Getters {
 
   get clientNavHtmlPath(): string {
     const { output } = this.store
-    return PATH.resolve( output, './index.html' )
+    return PATH.resolve( output, "./index.html" )
   }
 
   get clientConfigJsonPath(): string {
@@ -409,14 +410,20 @@ export class Getters {
         const blogPath: string = getBlogFilePath( directoryInfo )
 
         const relativeClientUrl = this.getBlogRelativeClientUrl( blogPath )
-        const relativeClientPropsUrl = this.getBlogRelativeClientPropsUrl( blogPath )
+        const relativeClientPropsUrl = this.getBlogRelativeClientPropsUrl(
+          blogPath
+        )
         const name: string = notNil( blogProps[ NAME ] ) ?
           blogProps[ NAME ] :
           getFileNameWithoutItsExtension( blogPath )
         const createTime: string = notNil( blogProps[ CREATE_TIME ] ) ?
           blogProps[ CREATE_TIME ] :
           null
-        const categorySequence: string[] = utilGetters.getCategorySequenceBy( blogPath, root, topDirectoryName  )
+        const categorySequence: string[] = utilGetters.getCategorySequenceBy(
+          blogPath,
+          root,
+          topDirectoryName
+        )
         const tags: string[] = notNil( blogProps[ TAGS ] ) ? blogProps[ TAGS ] : []
 
         const introduction: string = notNil( blogProps[ INTRODUCTION ] ) ?
@@ -424,14 +431,14 @@ export class Getters {
           utilGetters.getBlogIntroduction( blogPath )
 
         const blogInfo: BlogInfo = {
-          [ NAME_PATH ]          : blogPath,
-          [ RELATIVE_CLIENT_URL ]: relativeClientUrl,
+          [ NAME_PATH ]                : blogPath,
+          [ RELATIVE_CLIENT_URL ]      : relativeClientUrl,
           [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl,
-          [ NAME ]               : name,
-          [ CREATE_TIME ]        : createTime,
-          [ CATEGORY_SEQUENCE ]  : categorySequence,
-          [ TAGS ]        : tags,
-          [ INTRODUCTION ]: introduction
+          [ NAME ]                     : name,
+          [ CREATE_TIME ]              : createTime,
+          [ CATEGORY_SEQUENCE ]        : categorySequence,
+          [ TAGS ]                     : tags,
+          [ INTRODUCTION ]             : introduction
         }
 
         return blogInfo
@@ -499,6 +506,55 @@ export class Getters {
     }
   }
 
+  getBlogDetailHtml( blogInfo: BlogInfo ): string {
+    const { utilGetters, store } = this
+    const { [ DETAIL_SCRIPTS ]: scripts } = store.config
+
+    const {
+      [ NAME_PATH ]: blogPath,
+      [ NAME ]: blogName,
+      [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl
+    } = blogInfo
+
+    const string = readFileSync( blogPath )
+
+    if ( ! string ) {
+      return ""
+    }
+
+    const markedHtml = marked( string )
+
+    let scriptsString = ""
+    scripts.map( ( scriptString: string ) => {
+      scriptsString = scriptsString + scriptString
+    } )
+
+     const clientBlogProps = utilGetters.getClientBlogPropsBy( blogInfo )
+
+    const GV: ClientBlogProps = clientBlogProps
+    const GVJsonString = JSON.stringify( GV )
+
+    return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>${blogName}</title>
+  </head>
+  <body>
+    <div id="markedHtml" style="display: none;">${markedHtml}</div>
+    <div id="app"></div>
+  
+    
+    <script>window.GV=${GVJsonString}</script>
+    ${scriptsString}
+  </body>
+  </html>
+  `
+  }
+
   getBlogRelativeClientUrl( blogPath: string ) {
     const { config, root } = this.store
     const { [ TOP_DIRECTORY_NAME ]: topDirectoryName } = config
@@ -513,12 +569,11 @@ export class Getters {
   getBlogRelativeClientPropsUrl( blogPath: string ) {
     const { config, root } = this.store
     const { [ TOP_DIRECTORY_NAME ]: topDirectoryName } = config
-    const upperPath = PATH.resolve( blogPath, '../' )
-    const targetPath = PATH.resolve( upperPath, CLIENT_BLOG_PROPS_JSON  )
+    const upperPath = PATH.resolve( blogPath, "../" )
+    const targetPath = PATH.resolve( upperPath, CLIENT_BLOG_PROPS_JSON )
 
     return `${topDirectoryName}/${PATH.relative( root, targetPath )}`
   }
-
 
   getClientTagJsonPath( tagName: string ): string {
     const { clientNavTagsDirectoryPath, utilGetters } = this
@@ -536,24 +591,6 @@ export class Getters {
     return PATH.resolve( output, relativeClientPropsUrl )
   }
 
-  getBlogDetailPageHtml( blog: BlogInfo ): string {
-    const { [ DETAIL_SCRIPTS ]: detailScripts } = this.store.config
-    const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName, [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl } = blog
-    const string = readFileSync( blogPath )
-    if ( string ) {
-      const markedHtml = marked( string )
-
-      return GET_BLOG_DETAIL_HTML( {
-        [ NAME ]            : blogName,
-        [ MARKED_HTML ]     : markedHtml,
-        [ DETAIL_SCRIPTS ]: detailScripts,
-        [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl 
-      } )
-    }
-    return ""
-  }
-
-  
 }
 
 export class Mutations {
@@ -621,7 +658,6 @@ export class Actions {
     const { clientNavHtmlPath, clientNavHtml } = getters
 
     FS.outputFileSync( clientNavHtmlPath, clientNavHtml )
-
   }
 
   buildCategories() {
@@ -679,24 +715,21 @@ export class Actions {
     blogsInfo.map( output )
 
     function output( blogInfo: BlogInfo ) {
-      const { [RELATIVE_CLIENT_URL]: relativeClientUrl, [RELATIVE_CLIENT_PROPS_URL]: relativeClientPropsUrl } = blogInfo
-      
+      const {
+        [ RELATIVE_CLIENT_URL ]: relativeClientUrl,
+        [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl
+      } = blogInfo
 
       /**
        * Build html
        */
-      const outputHtmlPath = self.getters.getBlogDetailPageHtmlPath( relativeClientUrl )
-      const html = getters.getBlogDetailPageHtml( blogInfo )
+      const outputHtmlPath = self.getters.getBlogDetailPageHtmlPath(
+        relativeClientUrl
+      )
+      const html = getters.getBlogDetailHtml( blogInfo )
       if ( !utilGetters.isSameFileTextsWithText( outputHtmlPath, html ) ) {
         FS.outputFileSync( outputHtmlPath, html )
       }
-
-      /**
-       * Build props.json
-       */
-      const clientBlogProps = utilGetters.getClientBlogPropsBy( blogInfo )
-      const clientBlogPropsJsonPath = getters.getClientBlogPropsJsonPath( relativeClientPropsUrl )
-      FS.outputJSONSync( clientBlogPropsJsonPath, clientBlogProps )
     }
   }
 }

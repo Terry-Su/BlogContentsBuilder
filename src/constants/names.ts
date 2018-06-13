@@ -15,6 +15,7 @@ export const INTRODUCTION = 'introduction'
 export const MARKED_HTML = 'markedHtml'
 export const CONFIG = 'config'
 export const CLIENT_CONFIG = 'clinetConfig'
+export const NAV = 'nav'
 export const CLIENT_NAV = 'clientNav'
 
 export const FILE = 'file'

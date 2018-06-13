@@ -28,7 +28,6 @@ import {
   RELATIVE_CLIENT_PROPS_URL
 } from "../constants/names"
 import { ClientNavBlog } from "../typings/ClientNavBlog"
-import GET_BLOG_DETAIL_HTML from "../constants/dynamic/GET_BLOG_DETAIL_HTML"
 import { BlogInfo } from "../typings/BlogInfo"
 import { readFileSync } from "../utils/fs"
 import { ClientBlogProps } from "../typings/ClientBlogProps"
