@@ -14,6 +14,8 @@ export const NEWEST_BLOGS = 'newestBlogs'
 export const INTRODUCTION = 'introduction'
 export const MARKED_HTML = 'markedHtml'
 export const CONFIG = 'config'
+export const CLIENT_CONFIG = 'clinetConfig'
+export const CLIENT_NAV = 'clientNav'
 
 export const FILE = 'file'
 export const DIRECTORY = 'directory'
@@ -21,6 +23,7 @@ export const DIRECTORY = 'directory'
 export const PROPS = 'props'
 
 export const ALL = 'All'
+export const BLOG = 'Blog'
 
 export const DOT_MD = '.md'
 export const DOT_JSON = '.json'
@@ -29,3 +32,4 @@ export const DOT_HTML = '.html'
 
 
 export const UTF8 = 'utf8'
+

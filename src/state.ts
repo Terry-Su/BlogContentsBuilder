@@ -37,7 +37,8 @@ import {
   CATEGORIES,
   CREATE_TIME,
   INTRODUCTION,
-  NAME_PATH
+  NAME_PATH,
+  CLIENT_NAV
 } from "./constants/names"
 import { ClientNavBlog } from "./typings/ClientNavBlog"
 import { BlogProps } from "./typings/BlogProps"
@@ -57,15 +58,16 @@ import { ClientCategory } from "./typings/ClientCategory"
 import { readFileSync } from "./utils/fs"
 import * as marked from "marked"
 import GET_BLOG_DETAIL_HTML from "./constants/dynamic/GET_BLOG_DETAIL_HTML"
-import { CONFIG, RELATIVE_CLIENT_PROPS_URL } from './constants/names';
+import { CONFIG,CLIENT_CONFIG, RELATIVE_CLIENT_PROPS_URL } from './constants/names';
 import { ALL_BLOGS } from "./constants/names"
 import {
   NAME_NEWEST_BLOGS_COUNT,
   TOP_DIRECTORY_NAME,
-  INSERTED_SCRIPTS
+  NAV_HTML_TITLE
 } from "./constants/configNames"
 import * as CONFIG_NAMES_COLLECTION from "./constants/configNames"
 import { CLIENT_BLOG_PROPS_JSON } from "./constants/fileNames";
+import { DETAIL_SCRIPTS, NAV_SCRIPTS } from './constants/configNames';
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -194,7 +196,48 @@ export class Getters {
     }
   }
 
-  get clientConfig(): any {
+
+  get clientNavHtml(): string {
+    const { [NAV_HTML_TITLE]: title, [ NAV_SCRIPTS ]: scripts, } = this.store.config
+    const {
+      [ CLIENT_CONFIG ]: clientConfig,
+      [ CLIENT_NAV ]: clientNav
+    } = this
+
+
+
+    let scriptsString = ""
+    scripts.map( ( scriptString: string ) => {
+      scriptsString = scriptsString + scriptString
+    } )
+  
+    const GV = {
+      [ CONFIG ]    : clientConfig,
+      [ CLIENT_NAV ]: clientNav
+    }
+    const GVJsonString = JSON.stringify( GV )
+  
+    return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>${title}</title>
+  </head>
+  <body>
+    <div id="app"></div>
+  
+    
+    <script>window.GV=${GVJsonString}</script>
+    ${scriptsString}
+  </body>
+  </html>
+  `
+  }
+
+  get [CLIENT_CONFIG](): any {
     let res: any = {
       ...this.store.config
     }
@@ -209,7 +252,7 @@ export class Getters {
       } )
     }
   }
-
+  
   get clientNavNewestBlogs(): ClientNavBlog[] {
     const { blogsInfo, config } = this.store
     const {
@@ -274,7 +317,7 @@ export class Getters {
     return this.tags.map( ( { [ NAME ]: name }: Tag ) => name )
   }
 
-  get clientNav(): ClientNav {
+  get [CLIENT_NAV](): ClientNav {
     const { clientNavNewestBlogs, clientNavCategory, clientNavTags } = this
     return {
       [ NEWEST_BLOGS ]: clientNavNewestBlogs,
@@ -327,6 +370,11 @@ export class Getters {
 
       tag[ BLOGS ] = blogs
     }
+  }
+
+  get clientNavHtmlPath(): string {
+    const { output } = this.store
+    return PATH.resolve( output, './index.html' )
   }
 
   get clientConfigJsonPath(): string {
@@ -489,7 +537,7 @@ export class Getters {
   }
 
   getBlogDetailPageHtml( blog: BlogInfo ): string {
-    const { [ INSERTED_SCRIPTS ]: insertedScripts } = this.store.config
+    const { [ DETAIL_SCRIPTS ]: detailScripts } = this.store.config
     const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName, [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl } = blog
     const string = readFileSync( blogPath )
     if ( string ) {
@@ -498,7 +546,7 @@ export class Getters {
       return GET_BLOG_DETAIL_HTML( {
         [ NAME ]            : blogName,
         [ MARKED_HTML ]     : markedHtml,
-        [ INSERTED_SCRIPTS ]: insertedScripts,
+        [ DETAIL_SCRIPTS ]: detailScripts,
         [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl 
       } )
     }
@@ -562,21 +610,18 @@ export class Actions {
     const blogsInfo: BlogInfo[] = getters.getAllBlogsInfo( root )
     mutations.UPDATE_BLOGS_INFO( blogsInfo )
 
-    this.buildConfigJson()
-    this.buildClientNavJson()
+    this.buildNavHtml()
     this.buildCategories()
     this.buildTags()
     this.buildBlogDetailPages()
   }
 
-  buildConfigJson() {
-    const { clientConfig, clientConfigJsonPath } = this.getters
-    FS.outputJSONSync( clientConfigJsonPath, clientConfig )
-  }
+  buildNavHtml() {
+    const { getters } = this
+    const { clientNavHtmlPath, clientNavHtml } = getters
 
-  buildClientNavJson() {
-    const { clientNav, clientNavJsonPath } = this.getters
-    FS.outputJSONSync( clientNavJsonPath, clientNav )
+    FS.outputFileSync( clientNavHtmlPath, clientNavHtml )
+
   }
 
   buildCategories() {

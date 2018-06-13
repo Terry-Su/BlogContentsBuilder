@@ -1,5 +1,5 @@
 import build from "../../index"
-import { INSERTED_SCRIPTS } from '../../constants/configNames';
+import { NAV_SCRIPTS, DETAIL_SCRIPTS } from '../../constants/configNames';
 
 const PATH = require( "path" )
 
@@ -7,7 +7,12 @@ describe( `GetBlogsOriginInfo`, function() {
   it( `Test`, function() {
     const root = PATH.resolve( __dirname, "./rootCategory" )
     const output = PATH.resolve( __dirname, "./output" )
-    build( root, output, { [ INSERTED_SCRIPTS ]: [ '<script src="test.js" />' ], textLogo: 'Custom Blog', slogan: 'Custom slogan' } )
+    build( root, output, {
+      [ NAV_SCRIPTS ]: [ '<script src="nav.test.js" />' ],
+      [ DETAIL_SCRIPTS ]: [ '<script src="detail.test.js" />' ],
+      textLogo                : "Custom Blog",
+      slogan                  : "Custom slogan"
+    } )
     expect( true ).toBe( true )
   } )
 } )

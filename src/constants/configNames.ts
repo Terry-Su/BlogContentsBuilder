@@ -1,5 +1,9 @@
+export const NAV_HTML_TITLE = 'navHtmlTitle'
+
 export const TOP_DIRECTORY_NAME = 'topDirectoryName'
 
 export const NAME_NEWEST_BLOGS_COUNT = 'newestBlogsCount'
 
-export const INSERTED_SCRIPTS = 'insertedScripts'
+export const NAV_SCRIPTS = 'navScripts'
+
+export const DETAIL_SCRIPTS = 'detailScripts'
