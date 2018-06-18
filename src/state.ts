@@ -62,7 +62,7 @@ import {
   CLIENT_CONFIG,
   RELATIVE_CLIENT_PROPS_URL
 } from "./constants/names"
-import { ALL_BLOGS, NAV } from './constants/names';
+import { ALL_BLOGS, NAV } from "./constants/names"
 import {
   NAME_NEWEST_BLOGS_COUNT,
   TOP_DIRECTORY_NAME,
@@ -70,8 +70,13 @@ import {
 } from "./constants/configNames"
 import * as CONFIG_NAMES_COLLECTION from "./constants/configNames"
 import { CLIENT_BLOG_PROPS_JSON } from "./constants/fileNames"
-import { DETAIL_SCRIPTS, NAV_SCRIPTS } from "./constants/configNames"
-import { ClientBlogProps } from "./typings/ClientBlogProps";
+import {
+  DETAIL_SCRIPTS,
+  NAV_SCRIPTS,
+  NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML
+} from "./constants/configNames"
+import { ClientBlogProps } from "./typings/ClientBlogProps"
+import { notEmtyString } from "./utils/js"
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -213,8 +218,8 @@ export class Getters {
     } )
 
     const GV = {
-      [ CONFIG ]    : clientConfig,
-      [ NAV ]: clientNav
+      [ CONFIG ]: clientConfig,
+      [ NAV ]   : clientNav
     }
     const GVJsonString = JSON.stringify( GV )
 
@@ -243,13 +248,17 @@ export class Getters {
       ...this.store.config
     }
 
-    removeResKeys( res, CONFIG_NAMES_COLLECTION )
+    const exceptionalKeys = NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML
+
+    removeSomeResKeys( res, CONFIG_NAMES_COLLECTION )
 
     return res
 
-    function removeResKeys( res: any = {}, object: any = {} ) {
+    function removeSomeResKeys( res: any = {}, object: any = {} ) {
       mapValues( object, ( key: string ) => {
-        delete res[ key ]
+        if ( !exceptionalKeys.includes( key ) ) {
+          delete res[ key ]
+        }
       } )
     }
   }
@@ -347,6 +356,7 @@ export class Getters {
       const blogs = theBlogs.map( ( theBlog: any ) => {
         delete theBlog[ NAME_PATH ]
         delete theBlog[ TAGS ]
+        delete theBlog[ RELATIVE_CLIENT_PROPS_URL ]
         return theBlog
       } )
 
@@ -366,6 +376,7 @@ export class Getters {
       const blogs = theBlogs.map( ( theBlog: any ) => {
         delete theBlog[ NAME_PATH ]
         delete theBlog[ TAGS ]
+        delete theBlog[ RELATIVE_CLIENT_PROPS_URL ]
         return theBlog
       } )
 
@@ -373,8 +384,23 @@ export class Getters {
     }
   }
 
+  get clientOutputDirectory(): string {
+    return
+  }
+
   get clientNavHtmlPath(): string {
-    const { output } = this.store
+    const { output, config } = this.store
+    const {
+      [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]: nameOfDirectoryPlacingDataExceptNavHtml
+    } = config
+
+    if (
+      notNil( nameOfDirectoryPlacingDataExceptNavHtml ) &&
+      notEmtyString( nameOfDirectoryPlacingDataExceptNavHtml )
+    ) {
+      const basicOutputPath = PATH.resolve( output, "../" )
+      return PATH.resolve( basicOutputPath, "./index.html" )
+    }
     return PATH.resolve( output, "./index.html" )
   }
 
@@ -513,12 +539,11 @@ export class Getters {
     const {
       [ NAME_PATH ]: blogPath,
       [ NAME ]: blogName,
-      [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl
     } = blogInfo
 
     const string = readFileSync( blogPath )
 
-    if ( ! string ) {
+    if ( !string ) {
       return ""
     }
 
@@ -529,7 +554,7 @@ export class Getters {
       scriptsString = scriptsString + scriptString
     } )
 
-     const clientBlogProps = utilGetters.getClientBlogPropsBy( blogInfo )
+    const clientBlogProps = utilGetters.getClientBlogPropsBy( blogInfo )
 
     const GV: ClientBlogProps = clientBlogProps
     const GVJsonString = JSON.stringify( GV )
@@ -557,7 +582,9 @@ export class Getters {
 
   getBlogRelativeClientUrl( blogPath: string ) {
     const { config, root } = this.store
-    const { [ TOP_DIRECTORY_NAME ]: topDirectoryName } = config
+    const { [ TOP_DIRECTORY_NAME ]: topDirectoryName, [NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML]: nameOfDirectoryPlacingDataExceptNavHtml } = config
+
+    // const top = notNil( nameOfDirectoryPlacingDataExceptNavHtml ) && notEmtyString( nameOfDirectoryPlacingDataExceptNavHtml ) ? `${nameOfDirectoryPlacingDataExceptNavHtml}/${topDirectoryName}`: topDirectoryName
 
     const extension: string = PATH.extname( blogPath )
     const r: RegExp = new RegExp( `${extension}$` )
@@ -590,7 +617,6 @@ export class Getters {
     const { output } = this.store
     return PATH.resolve( output, relativeClientPropsUrl )
   }
-
 }
 
 export class Mutations {
@@ -642,7 +668,24 @@ export class Actions {
       ...currentConfig,
       ...config
     }
+
     notNil( config ) && mutations.UPDATE_CONFIG( combinedConfig )
+
+    const {
+      [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]: nameOfDirectoryPlacingDataExceptNavHtml
+    } = this.store.config
+
+    if (
+      notNil( nameOfDirectoryPlacingDataExceptNavHtml ) &&
+      notEmtyString( nameOfDirectoryPlacingDataExceptNavHtml )
+    ) {
+      const { output } = store
+      const newOutput = PATH.resolve(
+        output,
+        nameOfDirectoryPlacingDataExceptNavHtml
+      )
+      mutations.UPDATE_OUTPUT( newOutput )
+    }
 
     const blogsInfo: BlogInfo[] = getters.getAllBlogsInfo( root )
     mutations.UPDATE_BLOGS_INFO( blogsInfo )
@@ -717,7 +760,6 @@ export class Actions {
     function output( blogInfo: BlogInfo ) {
       const {
         [ RELATIVE_CLIENT_URL ]: relativeClientUrl,
-        [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl
       } = blogInfo
 
       /**
