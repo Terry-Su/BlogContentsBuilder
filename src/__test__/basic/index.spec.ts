@@ -1,5 +1,5 @@
 import build from "../../index"
-import { NAV_SCRIPTS, DETAIL_SCRIPTS } from '../../constants/configNames';
+import { NAV_SCRIPTS, DETAIL_SCRIPTS, NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML } from '../../constants/configNames';
 
 const PATH = require( "path" )
 
@@ -11,7 +11,9 @@ describe( `GetBlogsOriginInfo`, function() {
       [ NAV_SCRIPTS ]: [ '<script src="nav.test.js" />' ],
       [ DETAIL_SCRIPTS ]: [ '<script src="detail.test.js" />' ],
       textLogo                : "Custom Blog",
-      slogan                  : "Custom slogan"
+      slogan                  : "Custom slogan",
+      [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]: 'nameOfDirectoryPlacingDataExceptNavHtml'
+
     } )
     expect( true ).toBe( true )
   } )

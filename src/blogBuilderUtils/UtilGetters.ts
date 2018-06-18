@@ -56,7 +56,6 @@ export default class UtilGetters {
 
   getClientBlogPropsBy( blogInfo: BlogInfo ): ClientBlogProps {
     const {
-      [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl,
       [ NAME ]: name,
       [ CREATE_TIME ]: createTime,
       [ CATEGORY_SEQUENCE ]: categorySequence,
