@@ -1,3 +1,4 @@
+import { NAME_PATH } from "./../constants/names"
 import { isDirectoryType, filterIsDirectoryType } from "./dirTree"
 import {
   isBlogDirectoryInfo,
@@ -5,14 +6,12 @@ import {
   getBlogFilePath
 } from "./getBlogsInfo"
 import readJsonFromFile from "../utils/readJsonFromFile"
-import BLOG_PROPS_SCHEMA from "../constants/schemas/BLOG_PROPS_SCHEMA"
 import { notNil } from "../utils/lodash"
 import getFileNameWithoutItsExtension from "../utils/getFileNameWithoutItsExtension"
 import { BlogProps } from "../typings/BlogProps"
 import {
   CREATE_TIME,
   TAGS,
-  NAME_PATH,
   INTRODUCTION,
   DOT_JSON
 } from "../constants/names"
@@ -23,7 +22,6 @@ import * as marked from "marked"
 import { CLIENT_CATEGORY_RELATIVE_PATH } from "../constants/path"
 import {
   UTF8,
-  NAME,
   CATEGORY_SEQUENCE,
   RELATIVE_CLIENT_PROPS_URL
 } from "../constants/names"
@@ -31,6 +29,7 @@ import { ClientNavBlog } from "../typings/ClientNavBlog"
 import { BlogInfo } from "../typings/BlogInfo"
 import { readFileSync } from "../utils/fs"
 import { ClientBlogProps } from "../typings/ClientBlogProps"
+import { NAME } from "../constants/names"
 const dirTree = require( "directory-tree" )
 
 export default class UtilGetters {
@@ -62,10 +61,10 @@ export default class UtilGetters {
       [ TAGS ]: tags
     } = blogInfo
     return {
-      [ NAME ]                     : name,
-      [ CREATE_TIME ]              : createTime,
-      [ CATEGORY_SEQUENCE ]        : categorySequence,
-      [ TAGS ]                     : tags
+      [ NAME ]             : name,
+      [ CREATE_TIME ]      : createTime,
+      [ CATEGORY_SEQUENCE ]: categorySequence,
+      [ TAGS ]             : tags
     }
   }
 
@@ -82,5 +81,16 @@ export default class UtilGetters {
     let res = string.split( "/" )
     res = [ topDirectoryName, ...res ]
     return res
+  }
+
+  getBlogName( blogProps: BlogProps, blogPath: string ): string {
+    const { [ NAME ]: name } = blogProps
+    return notNil( blogProps[ NAME ] ) ?
+      blogProps[ NAME ] :
+      getFileNameWithoutItsExtension( blogPath )
+  }
+
+  getStringWithHyphenConnected(string: string) {
+    return string.replace(/ /g, '-')
   }
 }

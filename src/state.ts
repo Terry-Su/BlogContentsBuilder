@@ -38,7 +38,8 @@ import {
   CREATE_TIME,
   INTRODUCTION,
   NAME_PATH,
-  CLIENT_NAV
+  CLIENT_NAV,
+  UNIQUE_HTML_NAME
 } from "./constants/names"
 import { ClientNavBlog } from "./typings/ClientNavBlog"
 import { BlogProps } from "./typings/BlogProps"
@@ -77,6 +78,7 @@ import {
 } from "./constants/configNames"
 import { ClientBlogProps } from "./typings/ClientBlogProps"
 import { notEmtyString } from "./utils/js"
+import { BLOGS_HTMLS_DIRECTORY_NAME } from './constants/configNames';
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -435,13 +437,12 @@ export class Getters {
         const blogProps: BlogProps = potentialBlogProps
         const blogPath: string = getBlogFilePath( directoryInfo )
 
-        const relativeClientUrl = this.getBlogRelativeClientUrl( blogPath )
+        const name: string = utilGetters.getBlogName( blogProps, blogPath )
+
+        const relativeClientUrl = this.getBlogRelativeClientUrl( blogProps, name )
         const relativeClientPropsUrl = this.getBlogRelativeClientPropsUrl(
           blogPath
         )
-        const name: string = notNil( blogProps[ NAME ] ) ?
-          blogProps[ NAME ] :
-          getFileNameWithoutItsExtension( blogPath )
         const createTime: string = notNil( blogProps[ CREATE_TIME ] ) ?
           blogProps[ CREATE_TIME ] :
           null
@@ -455,6 +456,7 @@ export class Getters {
         const introduction: string = notNil( blogProps[ INTRODUCTION ] ) ?
           blogProps[ INTRODUCTION ] :
           utilGetters.getBlogIntroduction( blogPath )
+
 
         const blogInfo: BlogInfo = {
           [ NAME_PATH ]                : blogPath,
@@ -577,24 +579,30 @@ export class Getters {
   `
   }
 
-  getBlogRelativeClientUrl( blogPath: string ) {
+  getBlogRelativeClientUrl( blogProps: BlogProps={}, blogName: string ='' ) {
+    const { utilGetters } = this
     const { config, root } = this.store
     const {
       [ TOP_DIRECTORY_NAME ]: topDirectoryName,
-      [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]: nameOfDirectoryPlacingDataExceptNavHtml
+      [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]: nameOfDirectoryPlacingDataExceptNavHtml,
+      [BLOGS_HTMLS_DIRECTORY_NAME]: blogsHtmlsDirectoryName
     } = config
 
+  
     const top =
       notNil( nameOfDirectoryPlacingDataExceptNavHtml ) &&
       notEmtyString( nameOfDirectoryPlacingDataExceptNavHtml ) ?
-        `${nameOfDirectoryPlacingDataExceptNavHtml}/${topDirectoryName}` :
-        topDirectoryName
+        `${nameOfDirectoryPlacingDataExceptNavHtml}/${blogsHtmlsDirectoryName}` :
+        `${blogsHtmlsDirectoryName}`
 
-    const extension: string = PATH.extname( blogPath )
-    const r: RegExp = new RegExp( `${extension}$` )
-    const targetBlogHtmlPath = blogPath.replace( r, DOT_HTML )
+        const { [UNIQUE_HTML_NAME]: uniqueHtmlName = blogName } = blogProps
+        const unique = utilGetters.getStringWithHyphenConnected( uniqueHtmlName )
+    
+    // const extension: string = PATH.extname( blogPath )
+    // const r: RegExp = new RegExp( `${extension}$` )
+    // const targetBlogHtmlPath = blogPath.replace( r, DOT_HTML )
 
-    return `${top}/${PATH.relative( root, targetBlogHtmlPath )}`
+    return `${top}/${unique}${DOT_HTML}`
   }
 
   getBlogRelativeClientPropsUrl( blogPath: string ) {

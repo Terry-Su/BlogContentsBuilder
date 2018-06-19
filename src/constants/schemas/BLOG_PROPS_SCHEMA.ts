@@ -1,4 +1,5 @@
-import { NAME, CREATE_TIME, TAGS } from '../names';
+import { UNIQUE_HTML_NAME } from './../names';
+import { NAME, CREATE_TIME, TAGS, INTRODUCTION } from '../names';
 
 export default {
   type: 'object',
@@ -17,5 +18,13 @@ export default {
         }
       ]
     },
+    [ INTRODUCTION ]: {
+      type: 'string',
+    },
+    [ UNIQUE_HTML_NAME ]: {
+      type: 'string',
+    },
+    
+
   }
 }

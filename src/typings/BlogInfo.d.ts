@@ -16,5 +16,4 @@ interface BlogInfo {
   [CATEGORY_SEQUENCE]: string[]
   [TAGS]: string[]
   [INTRODUCTION]: string
-  
 }
