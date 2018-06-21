@@ -12,7 +12,7 @@ import getFileNameWithoutItsExtension from "./utils/getFileNameWithoutItsExtensi
 import BLOG_PROPS_SCHEMA from "./constants/schemas/BLOG_PROPS_SCHEMA"
 import readJsonFromFile from "./utils/readJsonFromFile"
 import { isValidDateString } from "./blogBuilderUtils/validate"
-import { isNil, cloneDeep, uniqWith, take, mapValues } from "lodash"
+import { isNil, cloneDeep, uniqWith, take, mapValues, includes } from "lodash"
 import { DEFAULT_CONFIG } from "./constants/default/index"
 import BlogBuilder from "./BlogBuilder"
 import UtilGetters from "./blogBuilderUtils/UtilGetters"
@@ -250,7 +250,8 @@ export class Getters {
       ...this.store.config
     }
 
-    const exceptionalKeys = NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML
+    // const exceptionalKeys: any[] = [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]
+    const exceptionalKeys: any[] = [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML, LANG ]
 
     removeSomeResKeys( res, CONFIG_NAMES_COLLECTION )
 
@@ -258,7 +259,7 @@ export class Getters {
 
     function removeSomeResKeys( res: any = {}, object: any = {} ) {
       mapValues( object, ( key: string ) => {
-        if ( !exceptionalKeys.includes( key ) ) {
+        if ( !includes(exceptionalKeys, key ) ) {
           delete res[ key ]
         }
       } )
