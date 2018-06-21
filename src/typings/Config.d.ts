@@ -1,3 +1,4 @@
+import { LANG } from './../constants/configNames';
 import { BLOGS_HTMLS_DIRECTORY_NAME } from '../constants/configNames';
 import {
   TOP_DIRECTORY_NAME,
@@ -16,4 +17,5 @@ interface Config {
   [DETAIL_SCRIPTS]: string[],
   [NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML]: string,
   [BLOGS_HTMLS_DIRECTORY_NAME]: string,
+  [LANG]: string,
 }

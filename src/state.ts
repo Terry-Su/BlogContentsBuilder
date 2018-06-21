@@ -78,7 +78,7 @@ import {
 } from "./constants/configNames"
 import { ClientBlogProps } from "./typings/ClientBlogProps"
 import { notEmtyString } from "./utils/js"
-import { BLOGS_HTMLS_DIRECTORY_NAME } from './constants/configNames';
+import { BLOGS_HTMLS_DIRECTORY_NAME, LANG } from './constants/configNames';
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -536,8 +536,7 @@ export class Getters {
 
   getBlogDetailHtml( blogInfo: BlogInfo ): string {
     const { utilGetters, store } = this
-    const { [ DETAIL_SCRIPTS ]: scripts } = store.config
-
+    const { [ DETAIL_SCRIPTS ]: scripts, [LANG]: lang } = store[CONFIG]
     const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName } = blogInfo
 
     const string = readFileSync( blogPath )
@@ -555,7 +554,12 @@ export class Getters {
 
     const clientBlogProps = utilGetters.getClientBlogPropsBy( blogInfo )
 
-    const GV: ClientBlogProps = clientBlogProps
+    const GV = {
+      ...clientBlogProps,
+      [CONFIG]: {
+        [LANG]: lang
+      }
+    }
     const GVJsonString = JSON.stringify( GV )
 
     return `

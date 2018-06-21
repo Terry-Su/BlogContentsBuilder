@@ -33,6 +33,8 @@ export const DOT_JSON = '.json'
 export const DOT_HTML = '.html'
 
 
+export const EN = 'en'
+export const CN = 'cn'
 
 export const UTF8 = 'utf8'
 
