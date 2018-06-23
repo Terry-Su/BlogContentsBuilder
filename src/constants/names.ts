@@ -16,6 +16,8 @@ export const UNIQUE_HTML_NAME = 'uniqueHtmlName'
 export const MARKED_HTML = 'markedHtml'
 export const CONFIG = 'config'
 export const CLIENT_CONFIG = 'clinetConfig'
+export const CLIENT_NAV_CONFIG = 'clinetNavConfig'
+export const CLIENT_DETAIL_CONFIG = 'clinetDetailConfig'
 export const NAV = 'nav'
 export const CLIENT_NAV = 'clientNav'
 

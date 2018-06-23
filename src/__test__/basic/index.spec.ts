@@ -1,5 +1,5 @@
 import build from "../../index"
-import { NAV_SCRIPTS, DETAIL_SCRIPTS, NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML, LANG } from '../../constants/configNames';
+import { NAV_SCRIPTS, DETAIL_SCRIPTS, NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML, LANG, NAV_META_DESCRIPTION } from '../../constants/configNames';
 import { CN } from "../../constants/names";
 
 const PATH = require( "path" )
@@ -10,6 +10,7 @@ describe( `GetBlogsOriginInfo`, function() {
     const output = PATH.resolve( __dirname, "./output" )
     build( root, output, {
       [ NAV_SCRIPTS ]: [ '<script src="nav.test.js" />' ],
+      [ NAV_META_DESCRIPTION ]: 'Custom nav meta description',
       [ DETAIL_SCRIPTS ]: [ '<script src="detail.test.js" />' ],
       textLogo                : "Custom Blog",
       slogan                  : "Custom slogan",

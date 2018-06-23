@@ -39,7 +39,8 @@ import {
   INTRODUCTION,
   NAME_PATH,
   CLIENT_NAV,
-  UNIQUE_HTML_NAME
+  UNIQUE_HTML_NAME,
+  CLIENT_NAV_CONFIG
 } from "./constants/names"
 import { ClientNavBlog } from "./typings/ClientNavBlog"
 import { BlogProps } from "./typings/BlogProps"
@@ -63,7 +64,7 @@ import {
   CLIENT_CONFIG,
   RELATIVE_CLIENT_PROPS_URL
 } from "./constants/names"
-import { ALL_BLOGS, NAV } from "./constants/names"
+import { ALL_BLOGS, NAV, CLIENT_DETAIL_CONFIG } from './constants/names';
 import {
   NAME_NEWEST_BLOGS_COUNT,
   TOP_DIRECTORY_NAME,
@@ -78,7 +79,14 @@ import {
 } from "./constants/configNames"
 import { ClientBlogProps } from "./typings/ClientBlogProps"
 import { notEmtyString } from "./utils/js"
-import { BLOGS_HTMLS_DIRECTORY_NAME, LANG } from './constants/configNames';
+import { CLIENT_NAV_CONFIG_NAMES } from "./constants/configNames"
+import {
+  BLOGS_HTMLS_DIRECTORY_NAME,
+  LANG,
+  NAV_META_DESCRIPTION
+} from "./constants/configNames"
+import { ClientDetailConfig } from "./typings/ClientDetailConfig";
+import { ClientNavConfig } from "./typings/ClientNavConfig";
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -210,9 +218,13 @@ export class Getters {
   get clientNavHtml(): string {
     const {
       [ NAV_HTML_TITLE ]: title,
-      [ NAV_SCRIPTS ]: scripts
+      [ NAV_SCRIPTS ]: scripts,
+      [ NAV_META_DESCRIPTION ]: navMetaDescription
     } = this.store.config
-    const { [ CLIENT_CONFIG ]: clientConfig, [ CLIENT_NAV ]: clientNav } = this
+    const {
+      [ CLIENT_NAV_CONFIG ]: clientNavConfig,
+      [ CLIENT_NAV ]: clientNav
+    } = this
 
     let scriptsString = ""
     scripts.map( ( scriptString: string ) => {
@@ -220,7 +232,7 @@ export class Getters {
     } )
 
     const GV = {
-      [ CONFIG ]: clientConfig,
+      [ CONFIG ]: clientNavConfig,
       [ NAV ]   : clientNav
     }
     const GVJsonString = JSON.stringify( GV )
@@ -230,6 +242,7 @@ export class Getters {
   <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <meta name="description" content="${navMetaDescription}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>${title}</title>
@@ -245,13 +258,12 @@ export class Getters {
   `
   }
 
-  get [CLIENT_CONFIG](): any {
+  get [CLIENT_NAV_CONFIG](): ClientNavConfig {
     let res: any = {
       ...this.store.config
     }
 
-    // const exceptionalKeys: any[] = [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]
-    const exceptionalKeys: any[] = [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML, LANG ]
+    const exceptionalKeys: any[] = CLIENT_NAV_CONFIG_NAMES
 
     removeSomeResKeys( res, CONFIG_NAMES_COLLECTION )
 
@@ -259,7 +271,7 @@ export class Getters {
 
     function removeSomeResKeys( res: any = {}, object: any = {} ) {
       mapValues( object, ( key: string ) => {
-        if ( !includes(exceptionalKeys, key ) ) {
+        if ( !includes( exceptionalKeys, key ) ) {
           delete res[ key ]
         }
       } )
@@ -422,6 +434,14 @@ export class Getters {
     return PATH.resolve( output, CLIENT_NAV_TAGS_DIRECTORY_PATH )
   }
 
+  get [CLIENT_DETAIL_CONFIG](): ClientDetailConfig {
+    const { store } = this
+    const { [ LANG ]: lang } = store[ CONFIG ]
+    return {
+      [ LANG ]: lang
+    }
+  }
+
   getBlogInfo( directoryInfo: any ): BlogInfo {
     const { root, config } = this.store
     const { utilGetters } = this
@@ -457,7 +477,6 @@ export class Getters {
         const introduction: string = notNil( blogProps[ INTRODUCTION ] ) ?
           blogProps[ INTRODUCTION ] :
           utilGetters.getBlogIntroduction( blogPath )
-
 
         const blogInfo: BlogInfo = {
           [ NAME_PATH ]                : blogPath,
@@ -536,8 +555,8 @@ export class Getters {
   }
 
   getBlogDetailHtml( blogInfo: BlogInfo ): string {
-    const { utilGetters, store } = this
-    const { [ DETAIL_SCRIPTS ]: scripts, [LANG]: lang } = store[CONFIG]
+    const { utilGetters, store, [CLIENT_DETAIL_CONFIG]: clientDetailConfig } = this
+    const { [ DETAIL_SCRIPTS ]: scripts, [ LANG ]: lang } = store[ CONFIG ]
     const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName } = blogInfo
 
     const string = readFileSync( blogPath )
@@ -557,9 +576,7 @@ export class Getters {
 
     const GV = {
       ...clientBlogProps,
-      [CONFIG]: {
-        [LANG]: lang
-      }
+      [ CONFIG ]: clientDetailConfig
     }
     const GVJsonString = JSON.stringify( GV )
 
@@ -584,25 +601,24 @@ export class Getters {
   `
   }
 
-  getBlogRelativeClientUrl( blogProps: BlogProps={}, blogName: string ='' ) {
+  getBlogRelativeClientUrl( blogProps: BlogProps = {}, blogName: string = "" ) {
     const { utilGetters } = this
     const { config, root } = this.store
     const {
       [ TOP_DIRECTORY_NAME ]: topDirectoryName,
       [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]: nameOfDirectoryPlacingDataExceptNavHtml,
-      [BLOGS_HTMLS_DIRECTORY_NAME]: blogsHtmlsDirectoryName
+      [ BLOGS_HTMLS_DIRECTORY_NAME ]: blogsHtmlsDirectoryName
     } = config
 
-  
     const top =
       notNil( nameOfDirectoryPlacingDataExceptNavHtml ) &&
       notEmtyString( nameOfDirectoryPlacingDataExceptNavHtml ) ?
         `${nameOfDirectoryPlacingDataExceptNavHtml}/${blogsHtmlsDirectoryName}` :
         `${blogsHtmlsDirectoryName}`
 
-        const { [UNIQUE_HTML_NAME]: uniqueHtmlName = blogName } = blogProps
-        const unique = utilGetters.getStringWithHyphenConnected( uniqueHtmlName )
-    
+    const { [ UNIQUE_HTML_NAME ]: uniqueHtmlName = blogName } = blogProps
+    const unique = utilGetters.getStringWithHyphenConnected( uniqueHtmlName )
+
     // const extension: string = PATH.extname( blogPath )
     // const r: RegExp = new RegExp( `${extension}$` )
     // const targetBlogHtmlPath = blogPath.replace( r, DOT_HTML )

@@ -2,7 +2,7 @@ import { DETAILS } from './../names';
 import { ALL, BLOG, EN } from '../names';
 import { Config } from "../../typings/Config"
 import { NEWEST_BLOGS_COUNT } from "../numbers"
-import { BLOGS_HTMLS_DIRECTORY_NAME, LANG } from '../configNames';
+import { BLOGS_HTMLS_DIRECTORY_NAME, LANG, NAV_META_DESCRIPTION } from '../configNames';
 import {
   TOP_DIRECTORY_NAME,
   NAME_NEWEST_BLOGS_COUNT,
@@ -17,6 +17,7 @@ export const DEFAULT_CONFIG: Config = {
   [ TOP_DIRECTORY_NAME ]     : ALL,
   [ NAME_NEWEST_BLOGS_COUNT ]: NEWEST_BLOGS_COUNT,
   [ NAV_SCRIPTS ]            : [],
+  [NAV_META_DESCRIPTION]: '',
   [ DETAIL_SCRIPTS ]         : [],
   [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]       : null,
   [BLOGS_HTMLS_DIRECTORY_NAME]: DETAILS,
