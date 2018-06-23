@@ -28,8 +28,20 @@ import { NAME, CONFIG, NAV } from "../constants/names"
 import { mapValues, isPlainObject } from "lodash"
 import { isString, isArray } from "util"
 const dirTree = require( "directory-tree" )
+import * as htmlToText from 'html-to-text'
 
 export default class UtilGetters {
+  /**
+   * // General
+   */
+  isSameFileTextsWithText( filePath: string, text: string ) {
+    const fileText: string = readFileSync( filePath )
+    return notNil( fileText ) ? fileText === text : false
+  }
+
+  /**
+   * // Client nav
+   */
   getClientCategoryJsonPath( upperDirectoryPath: string ): string {
     return PATH.resolve( upperDirectoryPath, CLIENT_CATEGORY_RELATIVE_PATH )
   }
@@ -38,16 +50,41 @@ export default class UtilGetters {
     return `${tagName}${DOT_JSON}`
   }
 
-  getBlogIntroduction( blogPath: string ) {
-    const string: string = readFileSync( blogPath )
-    return notNil( string ) ?
-      string.trim().substr( 0, BLOG_INTRODUCTION_CHARS_COUNT ) :
-      ""
+  /**
+   * // Client detail
+   */
+  getClientBlogMarkedHtml( blogPath: string ): string {
+    const string = readFileSync( blogPath )
+
+    if ( !string ) {
+      return ""
+    }
+
+    const markedHtml = marked( string )
+    return markedHtml
   }
 
-  isSameFileTextsWithText( filePath: string, text: string ) {
-    const fileText: string = readFileSync( filePath )
-    return notNil( fileText ) ? fileText === text : false
+  getBlogIntroduction( markedHtml: string ) {
+    const mainString = htmlToText.fromString( markedHtml ).replace( /\r/g, ' ' ).replace( /\n/g, ' ' ).replace( /\t/g, ' ' )
+    const slicedString = sliceWordsString( mainString, BLOG_INTRODUCTION_CHARS_COUNT )
+    let res = slicedString
+    if ( mainString.length >= BLOG_INTRODUCTION_CHARS_COUNT ) {
+      res = `${res}......`
+    }
+    return res
+
+    function sliceWordsString(string: string, limitCount: number) {
+      const strings = string.split( ' ' )
+      let total = 0
+
+      strings && strings.map( string => {
+        if ( total <= limitCount ) {
+          const count = string.length
+          total = total + count
+        }
+      } )
+      return string.substr( 0, total )
+    }
   }
 
   getClientBlogPropsBy( blogInfo: BlogInfo ): ClientBlogProps {
@@ -110,7 +147,7 @@ export default class UtilGetters {
 
       if ( isPlainObject( object ) ) {
         mapValues( object, value => {
-            recurToGetHtml( value )
+          recurToGetHtml( value )
         } )
         return
       }
@@ -122,7 +159,10 @@ export default class UtilGetters {
     }
 
     function removeHtmlTags( string: string ) {
-      return string.replace(/\</g, '').replace(/\>/g, '').replace(/\//g, '')
+      return string
+        .replace( /\</g, "" )
+        .replace( /\>/g, "" )
+        .replace( /\//g, "" )
     }
   }
 }

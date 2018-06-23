@@ -464,6 +464,8 @@ export class Getters {
 
         const name: string = utilGetters.getBlogName( blogProps, blogPath )
 
+        const markedHtml: string = utilGetters.getClientBlogMarkedHtml( blogPath )
+
         const relativeClientUrl = this.getBlogRelativeClientUrl( blogProps, name )
         const relativeClientPropsUrl = this.getBlogRelativeClientPropsUrl(
           blogPath
@@ -480,13 +482,14 @@ export class Getters {
 
         const introduction: string = notNil( blogProps[ INTRODUCTION ] ) ?
           blogProps[ INTRODUCTION ] :
-          utilGetters.getBlogIntroduction( blogPath )
+          utilGetters.getBlogIntroduction( markedHtml )
 
         const blogInfo: BlogInfo = {
           [ NAME_PATH ]                : blogPath,
           [ RELATIVE_CLIENT_URL ]      : relativeClientUrl,
           [ RELATIVE_CLIENT_PROPS_URL ]: relativeClientPropsUrl,
           [ NAME ]                     : name,
+          [ MARKED_HTML ]: markedHtml,
           [ CREATE_TIME ]              : createTime,
           [ CATEGORY_SEQUENCE ]        : categorySequence,
           [ TAGS ]                     : tags,
@@ -558,7 +561,7 @@ export class Getters {
     }
   }
 
-  getBlogDetailHtml( blogInfo: BlogInfo ): string {
+  getClientBlogDetailHtml( blogInfo: BlogInfo ): string {
     const {
       utilGetters,
       store,
@@ -568,17 +571,10 @@ export class Getters {
       [ DETAIL_SCRIPTS ]: scripts,
       [ LANG ]: lang,
       [ NAV_HTML_TITLE ]: title,
-      [ NAV_META_DESCRIPTION ]: navMetaDescription
     } = store[ CONFIG ]
-    const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName, [ INTRODUCTION ]: introduction } = blogInfo
+    const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName, [ INTRODUCTION ]: introduction, [MARKED_HTML]: markedHtml } = blogInfo
 
     const string = readFileSync( blogPath )
-
-    if ( !string ) {
-      return ""
-    }
-
-    const markedHtml = marked( string )
 
     let scriptsString = ""
     scripts.map( ( scriptString: string ) => {
@@ -829,7 +825,7 @@ export class Actions {
       const outputHtmlPath = self.getters.getBlogDetailPageHtmlPath(
         relativeClientUrl
       )
-      const html = getters.getBlogDetailHtml( blogInfo )
+      const html = getters.getClientBlogDetailHtml( blogInfo )
       if ( !utilGetters.isSameFileTextsWithText( outputHtmlPath, html ) ) {
         FS.outputFileSync( outputHtmlPath, html )
       }
