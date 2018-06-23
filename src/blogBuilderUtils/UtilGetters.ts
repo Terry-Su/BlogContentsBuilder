@@ -9,12 +9,7 @@ import readJsonFromFile from "../utils/readJsonFromFile"
 import { notNil } from "../utils/lodash"
 import getFileNameWithoutItsExtension from "../utils/getFileNameWithoutItsExtension"
 import { BlogProps } from "../typings/BlogProps"
-import {
-  CREATE_TIME,
-  TAGS,
-  INTRODUCTION,
-  DOT_JSON
-} from "../constants/names"
+import { CREATE_TIME, TAGS, INTRODUCTION, DOT_JSON } from "../constants/names"
 import * as FS from "fs-extra"
 import { BLOG_INTRODUCTION_CHARS_COUNT } from "../constants/numbers"
 import * as PATH from "path"
@@ -29,7 +24,9 @@ import { ClientNavBlog } from "../typings/ClientNavBlog"
 import { BlogInfo } from "../typings/BlogInfo"
 import { readFileSync } from "../utils/fs"
 import { ClientBlogProps } from "../typings/ClientBlogProps"
-import { NAME } from "../constants/names"
+import { NAME, CONFIG, NAV } from "../constants/names"
+import { mapValues, isPlainObject } from "lodash"
+import { isString } from "util"
 const dirTree = require( "directory-tree" )
 
 export default class UtilGetters {
@@ -90,7 +87,30 @@ export default class UtilGetters {
       getFileNameWithoutItsExtension( blogPath )
   }
 
-  getStringWithHyphenConnected(string: string) {
-    return string.replace(/ /g, '-')
+  getStringWithHyphenConnected( string: string ) {
+    return string.replace( / /g, "-" )
+  }
+
+  /**
+   * Client nav html
+   */
+  getClientNavPreRenderHtml( GV: any = {} ): string {
+    const { [ CONFIG ]: clientNavConfig, [ NAV ]: clientNav } = GV
+    let html = ""
+    recurToGetHtml( GV )
+
+    return `
+<div id="preRender" style="width:1px;height:1px;overflow:hidden;">${html}</div>`
+    function recurToGetHtml( object: any = {} ) {
+      if ( isPlainObject( object ) ) {
+        mapValues( object, value => {
+          if ( isString( value ) ) {
+            html = `${html}<p>${value}</p>`
+          } else {
+            recurToGetHtml( value )
+          }
+        } )
+      }
+    }
   }
 }

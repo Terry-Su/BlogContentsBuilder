@@ -223,7 +223,8 @@ export class Getters {
     } = this.store.config
     const {
       [ CLIENT_NAV_CONFIG ]: clientNavConfig,
-      [ CLIENT_NAV ]: clientNav
+      [ CLIENT_NAV ]: clientNav,
+      utilGetters
     } = this
 
     let scriptsString = ""
@@ -237,6 +238,8 @@ export class Getters {
     }
     const GVJsonString = JSON.stringify( GV )
 
+    const preRenderHtml = utilGetters.getClientNavPreRenderHtml( GV )
+
     return `
   <!DOCTYPE html>
   <html lang="en">
@@ -248,6 +251,7 @@ export class Getters {
     <title>${title}</title>
   </head>
   <body>
+    ${ preRenderHtml }
     <div id="app"></div>
   
     
