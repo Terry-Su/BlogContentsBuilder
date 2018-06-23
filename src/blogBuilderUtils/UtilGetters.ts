@@ -26,7 +26,7 @@ import { readFileSync } from "../utils/fs"
 import { ClientBlogProps } from "../typings/ClientBlogProps"
 import { NAME, CONFIG, NAV } from "../constants/names"
 import { mapValues, isPlainObject } from "lodash"
-import { isString } from "util"
+import { isString, isArray } from "util"
 const dirTree = require( "directory-tree" )
 
 export default class UtilGetters {
@@ -94,7 +94,7 @@ export default class UtilGetters {
   /**
    * Client nav html
    */
-  getClientNavPreRenderHtml( GV: any = {} ): string {
+  getClientPreRenderHtml( GV: any = {} ): string {
     const { [ CONFIG ]: clientNavConfig, [ NAV ]: clientNav } = GV
     let html = ""
     recurToGetHtml( GV )
@@ -102,15 +102,27 @@ export default class UtilGetters {
     return `
 <div id="preRender" style="width:1px;height:1px;overflow:hidden;">${html}</div>`
     function recurToGetHtml( object: any = {} ) {
+      if ( isString( object ) ) {
+        const removedHtmlTagsString = removeHtmlTags( object )
+        html = `${html}<p>${removedHtmlTagsString}</p>`
+        return
+      }
+
       if ( isPlainObject( object ) ) {
         mapValues( object, value => {
-          if ( isString( value ) ) {
-            html = `${html}<p>${value}</p>`
-          } else {
             recurToGetHtml( value )
-          }
         } )
+        return
       }
+
+      if ( isArray( object ) ) {
+        object.map( value => recurToGetHtml( value ) )
+        return
+      }
+    }
+
+    function removeHtmlTags( string: string ) {
+      return string.replace(/\</g, '').replace(/\>/g, '').replace(/\//g, '')
     }
   }
 }

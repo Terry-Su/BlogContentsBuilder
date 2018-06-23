@@ -238,7 +238,7 @@ export class Getters {
     }
     const GVJsonString = JSON.stringify( GV )
 
-    const preRenderHtml = utilGetters.getClientNavPreRenderHtml( GV )
+    const preRenderHtml = utilGetters.getClientPreRenderHtml( GV )
 
     return `
   <!DOCTYPE html>
@@ -584,6 +584,8 @@ export class Getters {
     }
     const GVJsonString = JSON.stringify( GV )
 
+    const preRenderHtml = utilGetters.getClientPreRenderHtml( GV )
+
     return `
   <!DOCTYPE html>
   <html lang="en">
@@ -594,6 +596,7 @@ export class Getters {
     <title>${blogName}</title>
   </head>
   <body>
+    ${ preRenderHtml }
     <div id="markedHtml" style="display: none;">${markedHtml}</div>
     <div id="app"></div>
   
