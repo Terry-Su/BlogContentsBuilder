@@ -1,14 +1,20 @@
-export function sliceWordsString(string: string, limitCount: number) {
-  const strings = string.split( ' ' )
-  let total = 0
+export function isEmptyString( string: string ) {
+  return string === ""
+}
 
-  strings && strings.map( string => {
-    if ( total <= limitCount ) {
-      const count = string.length
-      total = total + count
-    }
-  } )
-  return string.substr( 0, total )
+export function sliceWordsString( string: string, limitCount: number ) {
+  const strings = string.split( "" )
+  let target = limitCount
+  strings &&
+    strings.some( ( string, index ) => {
+      const count = index + 1
+      if ( count > limitCount && string === " " ) {
+        target = count - 1
+        return true
+      }
+    } )
+
+  return string.substr( 0, target )
 }
 
 export function removeHtmlPunctions( string: string ) {

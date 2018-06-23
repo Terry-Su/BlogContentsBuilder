@@ -38,7 +38,7 @@ const dirTree = require( "directory-tree" )
 import * as htmlToText from "html-to-text"
 import { Tag, Category } from "../typings/Store"
 import { ClientCategory } from "../typings/ClientCategory"
-import { sliceWordsString, removeHtmlPunctions } from "../utils/string"
+import { sliceWordsString, removeHtmlPunctions, isEmptyString } from "../utils/string"
 import { ClientBlogGV } from "../typings/ClientBlogGV"
 
 export default class UtilGetters {
@@ -75,7 +75,7 @@ export default class UtilGetters {
       mainString,
       CLIENT_META_DESCRIPTION_MAX_LENGTH
     )
-    return `${slicedString}......`
+    return `${slicedString}`
   }
 
   /**
@@ -116,7 +116,7 @@ export default class UtilGetters {
     function recurToGetHtml( object: any = {} ) {
       if ( isString( object ) ) {
         const removedHtmlPunctionsString = removeHtmlPunctions( object )
-        text = `${text} ${removedHtmlPunctionsString}`
+        text = `${text}${ isEmptyString( text ) ? '' : ' ' }${removedHtmlPunctionsString}`
         return
       }
 
@@ -185,7 +185,7 @@ export default class UtilGetters {
     )
     let res = slicedString
     if ( mainString.length >= BLOG_INTRODUCTION_CHARS_COUNT ) {
-      res = `${res}......`
+      res = `${res}...`
     }
     return res
   }
@@ -197,12 +197,12 @@ export default class UtilGetters {
       [ CONFIG ]: clientDetailConfig
     } = GV
 
-    return [ BLOG, categorySequence, tags ]
+    return [BLOG, categorySequence, tags ]
   }
 
   getClientBlogMetaDescription( GV: ClientBlogGV, markedHtml: string ) {
-    const keys = this.getClientBlogDataForMetaDescription( GV )
-    const dataText = this.getCommonDataText( keys )
+    const data = this.getClientBlogDataForMetaDescription( GV )
+    const dataText = this.getCommonDataText( data )
     const htmlText = this.getHtmlToMetaDescriptionText( markedHtml )
     return this.getMetatDescriptionText( `${dataText} ${htmlText}` )
   }
