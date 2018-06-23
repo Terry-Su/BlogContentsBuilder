@@ -1,3 +1,4 @@
+import { CLIENT_META_DESCRIPTION_MAX_LENGTH } from './../constants/numbers';
 import { NAME_PATH } from "./../constants/names"
 import { isDirectoryType, filterIsDirectoryType } from "./dirTree"
 import {
@@ -9,7 +10,7 @@ import readJsonFromFile from "../utils/readJsonFromFile"
 import { notNil } from "../utils/lodash"
 import getFileNameWithoutItsExtension from "../utils/getFileNameWithoutItsExtension"
 import { BlogProps } from "../typings/BlogProps"
-import { CREATE_TIME, TAGS, INTRODUCTION, DOT_JSON } from "../constants/names"
+import { CREATE_TIME, TAGS, INTRODUCTION, DOT_JSON, CATEGORIES } from '../constants/names';
 import * as FS from "fs-extra"
 import { BLOG_INTRODUCTION_CHARS_COUNT } from "../constants/numbers"
 import * as PATH from "path"
@@ -25,10 +26,13 @@ import { BlogInfo } from "../typings/BlogInfo"
 import { readFileSync } from "../utils/fs"
 import { ClientBlogProps } from "../typings/ClientBlogProps"
 import { NAME, CONFIG, NAV } from "../constants/names"
-import { mapValues, isPlainObject } from "lodash"
+import { mapValues, isPlainObject, uniq } from "lodash"
 import { isString, isArray } from "util"
 const dirTree = require( "directory-tree" )
 import * as htmlToText from 'html-to-text'
+import { Tag, Category } from '../typings/Store';
+import { ClientCategory } from '../typings/ClientCategory';
+import { sliceWordsString } from '../utils/string';
 
 export default class UtilGetters {
   /**
@@ -37,6 +41,58 @@ export default class UtilGetters {
   isSameFileTextsWithText( filePath: string, text: string ) {
     const fileText: string = readFileSync( filePath )
     return notNil( fileText ) ? fileText === text : false
+  }
+
+  getCommonHtmlToText( html: string ): string {
+    return htmlToText.fromString( html ).replace( /\r\n/g, ' ' ).replace( /\r/g, ' ' ).replace( /\n/g, ' ' ).replace( /\t/g, ' ' ).replace( /\s{2,}/g, ' ' )
+  }
+
+  getHtmlToMetaDescriptionText( html: string ): string {
+    return this.getMetatDescriptionText( this.getCommonHtmlToText( html ) )
+  }
+
+  getMetatDescriptionText( string: string ): string {
+    // replace html tags and quote symbol: " and limit length
+    const mainString = string.replace( /\</g, '' ).replace( /\>/g, '' ).replace( /\//g, '' ).replace( /\"/g, '' )
+    const slicedString = sliceWordsString( mainString, CLIENT_META_DESCRIPTION_MAX_LENGTH )
+    return `${slicedString}......`
+  }
+
+  /**
+   * // Client
+   */
+  getHtmlWrappingData( data: any = {} ): string {
+    let html = ""
+    recurToGetHtml( data )
+
+    return `
+<div id="preRender" style="width:1px;height:1px;overflow:hidden;">${html}</div>`
+    function recurToGetHtml( object: any = {} ) {
+      if ( isString( object ) ) {
+        const removedHtmlTagsString = removeHtmlTags( object )
+        html = `${html}<p>${removedHtmlTagsString}</p>`
+        return
+      }
+
+      if ( isPlainObject( object ) ) {
+        mapValues( object, value => {
+          recurToGetHtml( value )
+        } )
+        return
+      }
+
+      if ( isArray( object ) ) {
+        object.map( value => recurToGetHtml( value ) )
+        return
+      }
+    }
+
+    function removeHtmlTags( string: string ) {
+      return string
+        .replace( /\</g, "" )
+        .replace( /\>/g, "" )
+        .replace( /\//g, "" )
+    }
   }
 
   /**
@@ -49,6 +105,28 @@ export default class UtilGetters {
   getClientTagJsonFileName( tagName: string ) {
     return `${tagName}${DOT_JSON}`
   }
+
+  getClientCategoryKeys( category: ClientCategory ): string[]{
+    let res: string[] = []
+
+    recurToGetRes( category )
+
+    res = uniq(res)
+    return res
+
+    function recurToGetRes( category: ClientCategory ) {
+      if ( category ) {
+        const { [NAME]: name, [CATEGORIES]: categories } = category
+        res.push( name )
+
+        categories.map( subCategory => recurToGetRes( subCategory ) )
+      }
+    }
+  }
+
+
+
+  
 
   /**
    * // Client detail
@@ -65,26 +143,17 @@ export default class UtilGetters {
   }
 
   getBlogIntroduction( markedHtml: string ) {
-    const mainString = htmlToText.fromString( markedHtml ).replace( /\r/g, ' ' ).replace( /\n/g, ' ' ).replace( /\t/g, ' ' )
+    const mainString = this.getCommonHtmlToText( markedHtml )
     const slicedString = sliceWordsString( mainString, BLOG_INTRODUCTION_CHARS_COUNT )
     let res = slicedString
     if ( mainString.length >= BLOG_INTRODUCTION_CHARS_COUNT ) {
       res = `${res}......`
     }
     return res
+  }
 
-    function sliceWordsString(string: string, limitCount: number) {
-      const strings = string.split( ' ' )
-      let total = 0
-
-      strings && strings.map( string => {
-        if ( total <= limitCount ) {
-          const count = string.length
-          total = total + count
-        }
-      } )
-      return string.substr( 0, total )
-    }
+  getClientBlogMetaDescription( markedHtml: string ) {
+    return this.getHtmlToMetaDescriptionText( markedHtml )
   }
 
   getClientBlogPropsBy( blogInfo: BlogInfo ): ClientBlogProps {
@@ -128,41 +197,5 @@ export default class UtilGetters {
     return string.replace( / /g, "-" )
   }
 
-  /**
-   * Client nav html
-   */
-  getClientPreRenderHtml( GV: any = {} ): string {
-    const { [ CONFIG ]: clientNavConfig, [ NAV ]: clientNav } = GV
-    let html = ""
-    recurToGetHtml( GV )
-
-    return `
-<div id="preRender" style="width:1px;height:1px;overflow:hidden;">${html}</div>`
-    function recurToGetHtml( object: any = {} ) {
-      if ( isString( object ) ) {
-        const removedHtmlTagsString = removeHtmlTags( object )
-        html = `${html}<p>${removedHtmlTagsString}</p>`
-        return
-      }
-
-      if ( isPlainObject( object ) ) {
-        mapValues( object, value => {
-          recurToGetHtml( value )
-        } )
-        return
-      }
-
-      if ( isArray( object ) ) {
-        object.map( value => recurToGetHtml( value ) )
-        return
-      }
-    }
-
-    function removeHtmlTags( string: string ) {
-      return string
-        .replace( /\</g, "" )
-        .replace( /\>/g, "" )
-        .replace( /\//g, "" )
-    }
-  }
+ 
 }

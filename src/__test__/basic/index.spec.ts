@@ -10,7 +10,7 @@ describe( `GetBlogsOriginInfo`, function() {
     const output = PATH.resolve( __dirname, "./output" )
     build( root, output, {
       [ NAV_SCRIPTS ]: [ '<script src="nav.test.js" />' ],
-      [ NAV_META_DESCRIPTION ]: 'Custom nav meta description',
+      // [ NAV_META_DESCRIPTION ]: 'Custom nav meta description',
       [ DETAIL_SCRIPTS ]: [ '<script src="detail.test.js" />' ],
       textLogo                : "Custom Blog",
       slogan                  : "Custom slogan",

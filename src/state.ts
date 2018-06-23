@@ -12,7 +12,7 @@ import getFileNameWithoutItsExtension from "./utils/getFileNameWithoutItsExtensi
 import BLOG_PROPS_SCHEMA from "./constants/schemas/BLOG_PROPS_SCHEMA"
 import readJsonFromFile from "./utils/readJsonFromFile"
 import { isValidDateString } from "./blogBuilderUtils/validate"
-import { isNil, cloneDeep, uniqWith, take, mapValues, includes } from "lodash"
+import { isNil, cloneDeep, uniqWith, take, mapValues, includes, uniq } from "lodash"
 import { DEFAULT_CONFIG } from "./constants/default/index"
 import BlogBuilder from "./BlogBuilder"
 import UtilGetters from "./blogBuilderUtils/UtilGetters"
@@ -31,7 +31,6 @@ import { ClientNavCategory } from "./typings/ClientNavCategory"
 import {
   NEWEST_BLOGS,
   CATEGORY,
-  TAGS,
   NAME,
   BLOGS,
   CATEGORIES,
@@ -64,7 +63,7 @@ import {
   CLIENT_CONFIG,
   RELATIVE_CLIENT_PROPS_URL
 } from "./constants/names"
-import { ALL_BLOGS, NAV, CLIENT_DETAIL_CONFIG } from "./constants/names"
+import { ALL_BLOGS, NAV, CLIENT_DETAIL_CONFIG, CLIENT_NAV_GV, TAGS } from './constants/names';
 import {
   NAME_NEWEST_BLOGS_COUNT,
   TOP_DIRECTORY_NAME,
@@ -87,6 +86,7 @@ import {
 } from "./constants/configNames"
 import { ClientDetailConfig } from "./typings/ClientDetailConfig"
 import { ClientNavConfig } from "./typings/ClientNavConfig"
+import { ClientNavGV } from "./typings/clientNavGV";
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -215,30 +215,77 @@ export class Getters {
     }
   }
 
-  get clientNavHtml(): string {
-    const {
-      [ NAV_HTML_TITLE ]: title,
-      [ NAV_SCRIPTS ]: scripts,
-      [ NAV_META_DESCRIPTION ]: navMetaDescription
-    } = this.store.config
+  
+
+  get clientNavGV(): ClientNavGV{
     const {
       [ CLIENT_NAV_CONFIG ]: clientNavConfig,
       [ CLIENT_NAV ]: clientNav,
-      utilGetters
     } = this
+    return {
+      [ CONFIG ]: clientNavConfig,
+      [ NAV ]   : clientNav
+    }
+  }
+
+  get clientFilteredGVForMetaDescription(): any {
+    const { utilGetters } = this
+    const {
+      [ CONFIG ]: clientNavConfig,
+      [ NAV ]   : clientNav = {},
+    } = this.clientNavGV
+
+    const {
+    [CATEGORY]: category,
+    [TAGS]: tags=[],
+    [NEWEST_BLOGS]: newestBlogs
+    } = <any>clientNav
+
+    const categoryKeys = utilGetters.getClientCategoryKeys( category )
+    const keys = uniq( [ ...categoryKeys, ...tags ] )
+
+    return [ { [ CONFIG ]: clientNavConfig }, keys, newestBlogs ]
+  }
+
+  get clientNavPreRenderHtml(): string {
+    const { utilGetters, clientNavGV } = this
+    return utilGetters.getHtmlWrappingData( clientNavGV )
+  }
+
+  get defaultClientNavMetaDescription(): string {
+    const {
+      [ NAV_HTML_TITLE ]: title,
+    } = this.store.config
+
+    const { clientFilteredGVForMetaDescription, utilGetters } = this
+    const html = utilGetters.getHtmlWrappingData( clientFilteredGVForMetaDescription )
+    const text = utilGetters.getCommonHtmlToText( html )
+
+    return utilGetters.getMetatDescriptionText( `${title} ${text}` )
+  }
+
+  get clientNavHtml(): string {
+    const {
+      [ CLIENT_NAV_CONFIG ]: clientNavConfig,
+      [ CLIENT_NAV ]: clientNav,
+      [CLIENT_NAV_GV]: clientNavGV,
+      defaultClientNavMetaDescription,
+      clientNavPreRenderHtml
+    } = this
+    const {
+      [ NAV_HTML_TITLE ]: title,
+      [ NAV_SCRIPTS ]: scripts,
+      [ NAV_META_DESCRIPTION ]: navMetaDescription = defaultClientNavMetaDescription
+    } = this.store.config
+    
 
     let scriptsString = ""
     scripts.map( ( scriptString: string ) => {
       scriptsString = scriptsString + scriptString
     } )
 
-    const GV = {
-      [ CONFIG ]: clientNavConfig,
-      [ NAV ]   : clientNav
-    }
-    const GVJsonString = JSON.stringify( GV )
+    const GVJsonString = JSON.stringify( clientNavGV )
 
-    const preRenderHtml = utilGetters.getClientPreRenderHtml( GV )
 
     return `
   <!DOCTYPE html>
@@ -251,7 +298,7 @@ export class Getters {
     <title>${title}</title>
   </head>
   <body>
-    ${preRenderHtml}
+    ${clientNavPreRenderHtml}
     <div id="app"></div>
   
     
@@ -261,6 +308,7 @@ export class Getters {
   </html>
   `
   }
+
 
   get [CLIENT_NAV_CONFIG](): ClientNavConfig {
     let res: any = {
@@ -572,7 +620,7 @@ export class Getters {
       [ LANG ]: lang,
       [ NAV_HTML_TITLE ]: title,
     } = store[ CONFIG ]
-    const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName, [ INTRODUCTION ]: introduction, [MARKED_HTML]: markedHtml } = blogInfo
+    const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName, [MARKED_HTML]: markedHtml } = blogInfo
 
     const string = readFileSync( blogPath )
 
@@ -589,14 +637,16 @@ export class Getters {
     }
     const GVJsonString = JSON.stringify( GV )
 
-    const preRenderHtml = utilGetters.getClientPreRenderHtml( GV )
+    const preRenderHtml = utilGetters.getHtmlWrappingData( GV )
+
+    const metaDescription = utilGetters.getClientBlogMetaDescription( markedHtml )
 
     return `
   <!DOCTYPE html>
   <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta name="description" content="${introduction}">
+    <meta name="description" content="${metaDescription}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>${blogName} ${title}</title>
