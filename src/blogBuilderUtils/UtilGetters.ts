@@ -1,4 +1,4 @@
-import { CLIENT_META_DESCRIPTION_MAX_LENGTH } from './../constants/numbers';
+import { CLIENT_META_DESCRIPTION_MAX_LENGTH } from "./../constants/numbers"
 import { NAME_PATH } from "./../constants/names"
 import { isDirectoryType, filterIsDirectoryType } from "./dirTree"
 import {
@@ -10,7 +10,13 @@ import readJsonFromFile from "../utils/readJsonFromFile"
 import { notNil } from "../utils/lodash"
 import getFileNameWithoutItsExtension from "../utils/getFileNameWithoutItsExtension"
 import { BlogProps } from "../typings/BlogProps"
-import { CREATE_TIME, TAGS, INTRODUCTION, DOT_JSON, CATEGORIES } from '../constants/names';
+import {
+  CREATE_TIME,
+  TAGS,
+  INTRODUCTION,
+  DOT_JSON,
+  CATEGORIES
+} from "../constants/names"
 import * as FS from "fs-extra"
 import { BLOG_INTRODUCTION_CHARS_COUNT } from "../constants/numbers"
 import * as PATH from "path"
@@ -25,14 +31,15 @@ import { ClientNavBlog } from "../typings/ClientNavBlog"
 import { BlogInfo } from "../typings/BlogInfo"
 import { readFileSync } from "../utils/fs"
 import { ClientBlogProps } from "../typings/ClientBlogProps"
-import { NAME, CONFIG, NAV } from "../constants/names"
+import { NAME, CONFIG, NAV, BLOG } from '../constants/names';
 import { mapValues, isPlainObject, uniq } from "lodash"
 import { isString, isArray } from "util"
 const dirTree = require( "directory-tree" )
-import * as htmlToText from 'html-to-text'
-import { Tag, Category } from '../typings/Store';
-import { ClientCategory } from '../typings/ClientCategory';
-import { sliceWordsString } from '../utils/string';
+import * as htmlToText from "html-to-text"
+import { Tag, Category } from "../typings/Store"
+import { ClientCategory } from "../typings/ClientCategory"
+import { sliceWordsString, removeHtmlPunctions } from "../utils/string"
+import { ClientBlogGV } from "../typings/ClientBlogGV"
 
 export default class UtilGetters {
   /**
@@ -44,7 +51,13 @@ export default class UtilGetters {
   }
 
   getCommonHtmlToText( html: string ): string {
-    return htmlToText.fromString( html ).replace( /\r\n/g, ' ' ).replace( /\r/g, ' ' ).replace( /\n/g, ' ' ).replace( /\t/g, ' ' ).replace( /\s{2,}/g, ' ' )
+    return htmlToText
+      .fromString( html )
+      .replace( /\r\n/g, " " )
+      .replace( /\r/g, " " )
+      .replace( /\n/g, " " )
+      .replace( /\t/g, " " )
+      .replace( /\s{2,}/g, " " )
   }
 
   getHtmlToMetaDescriptionText( html: string ): string {
@@ -53,8 +66,15 @@ export default class UtilGetters {
 
   getMetatDescriptionText( string: string ): string {
     // replace html tags and quote symbol: " and limit length
-    const mainString = string.replace( /\</g, '' ).replace( /\>/g, '' ).replace( /\//g, '' ).replace( /\"/g, '' )
-    const slicedString = sliceWordsString( mainString, CLIENT_META_DESCRIPTION_MAX_LENGTH )
+    const mainString = string
+      .replace( /\</g, "" )
+      .replace( /\>/g, "" )
+      .replace( /\//g, "" )
+      .replace( /\"/g, "" )
+    const slicedString = sliceWordsString(
+      mainString,
+      CLIENT_META_DESCRIPTION_MAX_LENGTH
+    )
     return `${slicedString}......`
   }
 
@@ -69,8 +89,8 @@ export default class UtilGetters {
 <div id="preRender" style="width:1px;height:1px;overflow:hidden;">${html}</div>`
     function recurToGetHtml( object: any = {} ) {
       if ( isString( object ) ) {
-        const removedHtmlTagsString = removeHtmlTags( object )
-        html = `${html}<p>${removedHtmlTagsString}</p>`
+        const removedHtmlPunctionsString = removeHtmlPunctions( object )
+        html = `${html}<p>${removedHtmlPunctionsString}</p>`
         return
       }
 
@@ -86,12 +106,31 @@ export default class UtilGetters {
         return
       }
     }
+  }
 
-    function removeHtmlTags( string: string ) {
-      return string
-        .replace( /\</g, "" )
-        .replace( /\>/g, "" )
-        .replace( /\//g, "" )
+  getCommonDataText( data: any = {} ): string {
+    let text = ""
+    recurToGetHtml( data )
+
+    return `${text}`
+    function recurToGetHtml( object: any = {} ) {
+      if ( isString( object ) ) {
+        const removedHtmlPunctionsString = removeHtmlPunctions( object )
+        text = `${text} ${removedHtmlPunctionsString}`
+        return
+      }
+
+      if ( isPlainObject( object ) ) {
+        mapValues( object, value => {
+          recurToGetHtml( value )
+        } )
+        return
+      }
+
+      if ( isArray( object ) ) {
+        object.map( value => recurToGetHtml( value ) )
+        return
+      }
     }
   }
 
@@ -106,27 +145,23 @@ export default class UtilGetters {
     return `${tagName}${DOT_JSON}`
   }
 
-  getClientCategoryKeys( category: ClientCategory ): string[]{
+  getClientCategoryKeys( category: ClientCategory ): string[] {
     let res: string[] = []
 
     recurToGetRes( category )
 
-    res = uniq(res)
+    res = uniq( res )
     return res
 
     function recurToGetRes( category: ClientCategory ) {
       if ( category ) {
-        const { [NAME]: name, [CATEGORIES]: categories } = category
+        const { [ NAME ]: name, [ CATEGORIES ]: categories } = category
         res.push( name )
 
         categories.map( subCategory => recurToGetRes( subCategory ) )
       }
     }
   }
-
-
-
-  
 
   /**
    * // Client detail
@@ -144,7 +179,10 @@ export default class UtilGetters {
 
   getBlogIntroduction( markedHtml: string ) {
     const mainString = this.getCommonHtmlToText( markedHtml )
-    const slicedString = sliceWordsString( mainString, BLOG_INTRODUCTION_CHARS_COUNT )
+    const slicedString = sliceWordsString(
+      mainString,
+      BLOG_INTRODUCTION_CHARS_COUNT
+    )
     let res = slicedString
     if ( mainString.length >= BLOG_INTRODUCTION_CHARS_COUNT ) {
       res = `${res}......`
@@ -152,8 +190,21 @@ export default class UtilGetters {
     return res
   }
 
-  getClientBlogMetaDescription( markedHtml: string ) {
-    return this.getHtmlToMetaDescriptionText( markedHtml )
+  getClientBlogDataForMetaDescription( GV: ClientBlogGV ): any {
+    const {
+      [ CATEGORY_SEQUENCE ]: categorySequence,
+      [ TAGS ]: tags,
+      [ CONFIG ]: clientDetailConfig
+    } = GV
+
+    return [ BLOG, categorySequence, tags ]
+  }
+
+  getClientBlogMetaDescription( GV: ClientBlogGV, markedHtml: string ) {
+    const keys = this.getClientBlogDataForMetaDescription( GV )
+    const dataText = this.getCommonDataText( keys )
+    const htmlText = this.getHtmlToMetaDescriptionText( markedHtml )
+    return this.getMetatDescriptionText( `${dataText} ${htmlText}` )
   }
 
   getClientBlogPropsBy( blogInfo: BlogInfo ): ClientBlogProps {
@@ -196,6 +247,4 @@ export default class UtilGetters {
   getStringWithHyphenConnected( string: string ) {
     return string.replace( / /g, "-" )
   }
-
- 
 }

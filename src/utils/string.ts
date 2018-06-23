@@ -10,3 +10,12 @@ export function sliceWordsString(string: string, limitCount: number) {
   } )
   return string.substr( 0, total )
 }
+
+export function removeHtmlPunctions( string: string ) {
+  let res = string
+  res
+    .replace( /\</g, "" )
+    .replace( /\>/g, "" )
+    .replace( /\//g, "" )
+  return res
+}

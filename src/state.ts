@@ -87,6 +87,7 @@ import {
 import { ClientDetailConfig } from "./typings/ClientDetailConfig"
 import { ClientNavConfig } from "./typings/ClientNavConfig"
 import { ClientNavGV } from "./typings/clientNavGV";
+import { ClientBlogGV } from "./typings/ClientBlogGV";
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -228,10 +229,9 @@ export class Getters {
     }
   }
 
-  get clientFilteredGVForMetaDescription(): any {
+  get clientDataForMetaDescription(): any {
     const { utilGetters } = this
     const {
-      [ CONFIG ]: clientNavConfig,
       [ NAV ]   : clientNav = {},
     } = this.clientNavGV
 
@@ -239,12 +239,13 @@ export class Getters {
     [CATEGORY]: category,
     [TAGS]: tags=[],
     [NEWEST_BLOGS]: newestBlogs
+
     } = <any>clientNav
 
     const categoryKeys = utilGetters.getClientCategoryKeys( category )
     const keys = uniq( [ ...categoryKeys, ...tags ] )
 
-    return [ { [ CONFIG ]: clientNavConfig }, keys, newestBlogs ]
+    return [ keys, newestBlogs ]
   }
 
   get clientNavPreRenderHtml(): string {
@@ -257,9 +258,8 @@ export class Getters {
       [ NAV_HTML_TITLE ]: title,
     } = this.store.config
 
-    const { clientFilteredGVForMetaDescription, utilGetters } = this
-    const html = utilGetters.getHtmlWrappingData( clientFilteredGVForMetaDescription )
-    const text = utilGetters.getCommonHtmlToText( html )
+    const { clientDataForMetaDescription, utilGetters } = this
+    const text = utilGetters.getCommonDataText( clientDataForMetaDescription )
 
     return utilGetters.getMetatDescriptionText( `${title} ${text}` )
   }
@@ -631,7 +631,7 @@ export class Getters {
 
     const clientBlogProps = utilGetters.getClientBlogPropsBy( blogInfo )
 
-    const GV = {
+    const GV: ClientBlogGV = {
       ...clientBlogProps,
       [ CONFIG ]: clientDetailConfig
     }
@@ -639,7 +639,7 @@ export class Getters {
 
     const preRenderHtml = utilGetters.getHtmlWrappingData( GV )
 
-    const metaDescription = utilGetters.getClientBlogMetaDescription( markedHtml )
+    const metaDescription = utilGetters.getClientBlogMetaDescription( GV, markedHtml )
 
     return `
   <!DOCTYPE html>
