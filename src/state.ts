@@ -570,7 +570,7 @@ export class Getters {
       [ NAV_HTML_TITLE ]: title,
       [ NAV_META_DESCRIPTION ]: navMetaDescription
     } = store[ CONFIG ]
-    const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName } = blogInfo
+    const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName, [ INTRODUCTION ]: introduction } = blogInfo
 
     const string = readFileSync( blogPath )
 
@@ -600,6 +600,7 @@ export class Getters {
   <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <meta name="description" content="${introduction}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>${blogName} ${title}</title>
