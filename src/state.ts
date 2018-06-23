@@ -64,7 +64,7 @@ import {
   CLIENT_CONFIG,
   RELATIVE_CLIENT_PROPS_URL
 } from "./constants/names"
-import { ALL_BLOGS, NAV, CLIENT_DETAIL_CONFIG } from './constants/names';
+import { ALL_BLOGS, NAV, CLIENT_DETAIL_CONFIG } from "./constants/names"
 import {
   NAME_NEWEST_BLOGS_COUNT,
   TOP_DIRECTORY_NAME,
@@ -85,8 +85,8 @@ import {
   LANG,
   NAV_META_DESCRIPTION
 } from "./constants/configNames"
-import { ClientDetailConfig } from "./typings/ClientDetailConfig";
-import { ClientNavConfig } from "./typings/ClientNavConfig";
+import { ClientDetailConfig } from "./typings/ClientDetailConfig"
+import { ClientNavConfig } from "./typings/ClientNavConfig"
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -251,7 +251,7 @@ export class Getters {
     <title>${title}</title>
   </head>
   <body>
-    ${ preRenderHtml }
+    ${preRenderHtml}
     <div id="app"></div>
   
     
@@ -559,8 +559,17 @@ export class Getters {
   }
 
   getBlogDetailHtml( blogInfo: BlogInfo ): string {
-    const { utilGetters, store, [CLIENT_DETAIL_CONFIG]: clientDetailConfig } = this
-    const { [ DETAIL_SCRIPTS ]: scripts, [ LANG ]: lang } = store[ CONFIG ]
+    const {
+      utilGetters,
+      store,
+      [ CLIENT_DETAIL_CONFIG ]: clientDetailConfig
+    } = this
+    const {
+      [ DETAIL_SCRIPTS ]: scripts,
+      [ LANG ]: lang,
+      [ NAV_HTML_TITLE ]: title,
+      [ NAV_META_DESCRIPTION ]: navMetaDescription
+    } = store[ CONFIG ]
     const { [ NAME_PATH ]: blogPath, [ NAME ]: blogName } = blogInfo
 
     const string = readFileSync( blogPath )
@@ -593,10 +602,10 @@ export class Getters {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>${blogName}</title>
+    <title>${blogName} ${title}</title>
   </head>
   <body>
-    ${ preRenderHtml }
+    ${preRenderHtml}
     <div id="markedHtml" style="display: none;">${markedHtml}</div>
     <div id="app"></div>
   
