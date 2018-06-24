@@ -78,7 +78,7 @@ import {
 } from "./constants/configNames"
 import { ClientBlogProps } from "./typings/ClientBlogProps"
 import { notEmtyString } from "./utils/js"
-import { CLIENT_NAV_CONFIG_NAMES } from "./constants/configNames"
+import { CLIENT_NAV_CONFIG_NAMES, GET_NAV_META_DESCRIPTION } from './constants/configNames';
 import {
   BLOGS_HTMLS_DIRECTORY_NAME,
   LANG,
@@ -264,19 +264,41 @@ export class Getters {
     return utilGetters.getMetatDescriptionText( `${title} ${text}` )
   }
 
+  get computedNavMetaDescription(): string {
+    const { defaultClientNavMetaDescription } = this
+    let {  [ NAV_META_DESCRIPTION ]: navMetaDescription = defaultClientNavMetaDescription,
+      [ GET_NAV_META_DESCRIPTION ]: getNavMetaDescription
+     } = this.store.config
+
+
+     if ( getNavMetaDescription ) {
+      const {
+        [ NAV_HTML_TITLE ]: title,
+      } = this.store.config
+      const { clientDataForMetaDescription, utilGetters } = this
+      const text = utilGetters.getCommonDataText( clientDataForMetaDescription )
+
+      return utilGetters.getMetatDescriptionText( getNavMetaDescription( { title, text } ) )
+     }
+
+     return navMetaDescription
+  }
+
   get clientNavHtml(): string {
     const {
       [ CLIENT_NAV_CONFIG ]: clientNavConfig,
       [ CLIENT_NAV ]: clientNav,
       [CLIENT_NAV_GV]: clientNavGV,
-      defaultClientNavMetaDescription,
-      clientNavPreRenderHtml
+      clientNavPreRenderHtml,
+      computedNavMetaDescription
     } = this
     const {
       [ NAV_HTML_TITLE ]: title,
       [ NAV_SCRIPTS ]: scripts,
-      [ NAV_META_DESCRIPTION ]: navMetaDescription = defaultClientNavMetaDescription
     } = this.store.config
+
+     
+    
     
 
     let scriptsString = ""
@@ -287,12 +309,14 @@ export class Getters {
     const GVJsonString = JSON.stringify( clientNavGV )
 
 
+
+
     return `
   <!DOCTYPE html>
   <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta name="description" content="${navMetaDescription}">
+    <meta name="description" content="${computedNavMetaDescription}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>${title}</title>
