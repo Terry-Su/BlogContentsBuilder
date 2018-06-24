@@ -200,11 +200,12 @@ export default class UtilGetters {
     return [BLOG, categorySequence, tags ]
   }
 
-  getClientBlogMetaDescription( GV: ClientBlogGV, markedHtml: string ) {
+  getClientBlogMetaDescription( GV: ClientBlogGV,  markedHtml: string ) {
+    const { [NAME]: title } = GV
     const data = this.getClientBlogDataForMetaDescription( GV )
     const dataText = this.getCommonDataText( data )
     const htmlText = this.getHtmlToMetaDescriptionText( markedHtml )
-    return this.getMetatDescriptionText( `${dataText} ${htmlText}` )
+    return this.getMetatDescriptionText( `${ title } ${dataText} ${htmlText}` )
   }
 
   getClientBlogPropsBy( blogInfo: BlogInfo ): ClientBlogProps {
