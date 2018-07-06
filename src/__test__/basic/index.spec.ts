@@ -30,6 +30,6 @@ describe( `GetBlogsOriginInfo`, function() {
         "nameOfDirectoryPlacingDataExceptNavHtml",
       [ LANG ]: CN
     } )
-    expect( true ).toBe( true )
+    expect( true ).toBe( false )
   } )
 } )

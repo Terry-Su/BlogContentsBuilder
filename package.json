@@ -6,6 +6,7 @@
   "scripts": {
     "start": "gulp",
     "test": "node spec/jasmineEntry",
+    "server": "node server",
     "eslint": "eslint src/**"
   },
   "repository": {
@@ -26,6 +27,7 @@
     "@types/marked": "^0.3.0",
     "@types/node": "^10.3.0",
     "ajv": "^6.5.0",
+    "browser-sync": "^2.24.5",
     "directory-tree": "^2.1.0",
     "eslint": "^4.19.1",
     "eslint-plugin-prettier": "^2.6.0",

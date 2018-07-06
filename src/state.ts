@@ -893,7 +893,7 @@ export class Actions {
     function output( blogInfo: BlogInfo ) {
       const { [ RELATIVE_CLIENT_URL ]: relativeClientUrl } = blogInfo
 
-      /**
+      /** 
        * Build html
        */
       const outputHtmlPath = self.getters.getBlogDetailPageHtmlPath(
