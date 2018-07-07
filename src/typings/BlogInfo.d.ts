@@ -1,4 +1,4 @@
-import { MARKED_HTML } from './../constants/names';
+import { MARKED_HTML, UNIQUE_HTML_NAME } from './../constants/names';
 import { RELATIVE_CLIENT_URL, CATEGORY_SEQUENCE, RELATIVE_CLIENT_PROPS_URL } from '../constants/names';
 import {
   NAME,
@@ -17,5 +17,6 @@ interface BlogInfo {
   [CREATE_TIME]: string
   [CATEGORY_SEQUENCE]: string[]
   [TAGS]: string[]
-  [INTRODUCTION]: string
+  [INTRODUCTION]: string,
+  [UNIQUE_HTML_NAME]: string
 }

@@ -535,7 +535,9 @@ export class Getters {
 
         const markedHtml: string = utilGetters.getClientBlogMarkedHtml(blogPath)
 
-        const relativeClientUrl = this.getBlogRelativeClientUrl(blogProps, blogPath)
+        const uniqueHtmlName: string = this.getBlogUniqueHtmlName( blogProps, blogPath )
+
+        const relativeClientUrl = this.getBlogRelativeClientUrl(blogProps, uniqueHtmlName)
         const relativeClientPropsUrl = this.getBlogRelativeClientPropsUrl(
           blogPath
         )
@@ -562,7 +564,8 @@ export class Getters {
           [CREATE_TIME]: createTime,
           [CATEGORY_SEQUENCE]: categorySequence,
           [TAGS]: tags,
-          [INTRODUCTION]: introduction
+          [INTRODUCTION]: introduction,
+          [UNIQUE_HTML_NAME]: uniqueHtmlName
         }
 
         return blogInfo
@@ -645,7 +648,7 @@ export class Getters {
     const {
       [DETAIL_SCRIPTS]: scripts,
     } = store[CONFIG][DETAIL]
-    const { [NAME_PATH]: blogPath, [NAME]: blogName, [MARKED_HTML]: markedHtml } = blogInfo
+    const { [NAME_PATH]: blogPath, [NAME]: blogName, [MARKED_HTML]: markedHtml,  [UNIQUE_HTML_NAME]: uniqueHtmlName } = blogInfo
 
     const string = readFileSync(blogPath)
 
@@ -658,7 +661,8 @@ export class Getters {
 
     const GV: ClientBlogGV = {
       ...clientBlogProps,
-      [CONFIG]: clientDetailConfig
+      [CONFIG]: clientDetailConfig,
+      [UNIQUE_HTML_NAME]: uniqueHtmlName
     }
     const GVJsonString = escape(JSON.stringify(GV))
 
@@ -690,7 +694,17 @@ export class Getters {
   `
   }
 
-  getBlogRelativeClientUrl(blogProps: BlogProps = {}, blogPath: string = "") {
+
+  getBlogUniqueHtmlName( blogProps: BlogProps = {}, blogPath: string = "" ): string {
+    const { utilGetters } = this
+    const blogDirectoryName = utilGetters.getBlogDirectoryName(blogPath)
+    const { [UNIQUE_HTML_NAME]: uniqueHtmlName = blogDirectoryName } = blogProps
+    const lowerCaseString = uniqueHtmlName.toLowerCase()
+    const res = utilGetters.getStringWithHyphenConnected( lowerCaseString )
+    return res
+  }
+
+  getBlogRelativeClientUrl(blogProps: BlogProps = {}, uniqueHtmlName: string) {
     const { utilGetters } = this
     const { config, root } = this.store
     const {
@@ -705,18 +719,7 @@ export class Getters {
         `${nameOfDirectoryPlacingDataExceptNavHtml}/${blogsHtmlsDirectoryName}` :
         `${blogsHtmlsDirectoryName}`
 
-    const blogDirectoryName = utilGetters.getBlogDirectoryName(blogPath)
-
-    const { [UNIQUE_HTML_NAME]: uniqueHtmlName = blogDirectoryName } = blogProps
-    
-    const lowerCaseString = uniqueHtmlName.toLowerCase()
-    const unique = utilGetters.getStringWithHyphenConnected( lowerCaseString )
-
-    // const extension: string = PATH.extname( blogPath )
-    // const r: RegExp = new RegExp( `${extension}$` )
-    // const targetBlogHtmlPath = blogPath.replace( r, DOT_HTML )
-
-    return `${top}/${unique}${DOT_HTML}`
+    return `${top}/${uniqueHtmlName}${DOT_HTML}`
   }
 
   getBlogRelativeClientPropsUrl(blogPath: string) {

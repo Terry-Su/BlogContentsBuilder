@@ -1,16 +1,16 @@
-export const NAV_HTML_TITLE = 'navTitle'
+export const NAV_HTML_TITLE = 'title'
 
 export const TOP_DIRECTORY_NAME = 'topDirectoryName'
 
 export const NAME_NEWEST_BLOGS_COUNT = 'newestBlogsCount'
 
-export const NAV_SCRIPTS = 'navScripts'
+export const NAV_SCRIPTS = 'scripts'
 
-export const NAV_META_DESCRIPTION = 'navMetaDescription'
+export const NAV_META_DESCRIPTION = 'metaDescription'
 
 export const GET_NAV_META_DESCRIPTION = 'getMetaDescription'
 
-export const DETAIL_SCRIPTS = 'detailScripts'
+export const DETAIL_SCRIPTS = 'scripts'
 
 export const NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML = 'nameOfDirectoryPlacingDataExceptNavHtml'
 

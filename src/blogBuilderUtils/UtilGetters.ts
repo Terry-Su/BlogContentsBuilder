@@ -214,7 +214,7 @@ export default class UtilGetters {
       [ NAME ]: name,
       [ CREATE_TIME ]: createTime,
       [ CATEGORY_SEQUENCE ]: categorySequence,
-      [ TAGS ]: tags
+      [ TAGS ]: tags,
     } = blogInfo
     return {
       [ NAME ]             : name,
