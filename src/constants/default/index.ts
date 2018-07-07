@@ -1,7 +1,7 @@
-import { DETAILS } from './../names';
+import { DETAILS, NAV, DETAIL } from './../names';
 import { ALL, BLOG, EN } from '../names';
 import { Config } from "../../typings/Config"
-import { NEWEST_BLOGS_COUNT } from "../numbers"
+import { DEFAULT_NEWEST_BLOGS_COUNT } from "../numbers"
 import { BLOGS_HTMLS_DIRECTORY_NAME, LANG, NAV_META_DESCRIPTION, GET_NAV_META_DESCRIPTION } from '../configNames';
 import {
   TOP_DIRECTORY_NAME,
@@ -13,14 +13,33 @@ import {
 } from "../configNames"
 
 export const DEFAULT_CONFIG: Config = {
-  [ NAV_HTML_TITLE ]         : BLOG,
-  [ TOP_DIRECTORY_NAME ]     : ALL,
-  [ NAME_NEWEST_BLOGS_COUNT ]: NEWEST_BLOGS_COUNT,
-  [ NAV_SCRIPTS ]            : [],
-  [NAV_META_DESCRIPTION]: undefined,
-  [GET_NAV_META_DESCRIPTION]: undefined,
-  [ DETAIL_SCRIPTS ]         : [],
-  [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]       : null,
+  /**
+   * System
+   */
   [BLOGS_HTMLS_DIRECTORY_NAME]: DETAILS,
-  [LANG]: EN
+
+  /**
+   * Common
+   */
+  [NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML]: null,
+  [TOP_DIRECTORY_NAME]: ALL,
+  [LANG]: EN,
+
+   /**
+   * Nav
+   */
+  [NAV]: {
+    [NAV_HTML_TITLE]: BLOG,
+    [NAME_NEWEST_BLOGS_COUNT]: DEFAULT_NEWEST_BLOGS_COUNT,
+    [NAV_SCRIPTS]: [],
+    [NAV_META_DESCRIPTION]: undefined,
+    [GET_NAV_META_DESCRIPTION]: undefined,
+  },
+
+  /**
+   * Detail
+   */
+  [DETAIL]: {
+    [DETAIL_SCRIPTS]: [],
+  }, 
 }

@@ -18,12 +18,3 @@ export const BLOGS_HTMLS_DIRECTORY_NAME = 'blogsHtmlsDirectoryName'
 
 export const LANG = 'lang'
 
-
-export const CLIENT_NAV_CONFIG_NAMES = [
-  NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML,
-  LANG
-]
-
-export const CLIENT_DETAIL_CONFIG_NAMES = [
-  LANG
-]

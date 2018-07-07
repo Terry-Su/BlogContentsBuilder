@@ -21,6 +21,7 @@ export const CLIENT_DETAIL_CONFIG = 'clinetDetailConfig'
 export const NAV = 'nav'
 export const CLIENT_NAV = 'clientNav'
 export const CLIENT_NAV_GV = 'clientNavGV'
+export const DETAIL = 'detail'
 
 export const FILE = 'file'
 export const DIRECTORY = 'directory'

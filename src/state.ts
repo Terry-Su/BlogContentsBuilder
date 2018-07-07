@@ -12,7 +12,7 @@ import getFileNameWithoutItsExtension from "./utils/getFileNameWithoutItsExtensi
 import BLOG_PROPS_SCHEMA from "./constants/schemas/BLOG_PROPS_SCHEMA"
 import readJsonFromFile from "./utils/readJsonFromFile"
 import { isValidDateString } from "./blogBuilderUtils/validate"
-import { isNil, cloneDeep, uniqWith, take, mapValues, includes, uniq } from "lodash"
+import { isNil, cloneDeep, uniqWith, take, mapValues, includes, uniq, difference, pick, pickBy, values } from "lodash"
 import { DEFAULT_CONFIG } from "./constants/default/index"
 import BlogBuilder from "./BlogBuilder"
 import UtilGetters from "./blogBuilderUtils/UtilGetters"
@@ -39,7 +39,8 @@ import {
   NAME_PATH,
   CLIENT_NAV,
   UNIQUE_HTML_NAME,
-  CLIENT_NAV_CONFIG
+  CLIENT_NAV_CONFIG,
+  DETAIL
 } from "./constants/names"
 import { ClientNavBlog } from "./typings/ClientNavBlog"
 import { BlogProps } from "./typings/BlogProps"
@@ -70,6 +71,8 @@ import {
   NAV_HTML_TITLE
 } from "./constants/configNames"
 import * as CONFIG_NAMES_COLLECTION from "./constants/configNames"
+import * as CLINET_NAV_CONFIG_NAMES_COLLECTION from "./constants/clientNavConfigNames"
+import * as CLINET_DETAIL_CONFIG_NAMES_COLLECTION from "./constants/clientDetailConfigNames"
 import { CLIENT_BLOG_PROPS_JSON } from "./constants/fileNames"
 import {
   DETAIL_SCRIPTS,
@@ -78,7 +81,7 @@ import {
 } from "./constants/configNames"
 import { ClientBlogProps } from "./typings/ClientBlogProps"
 import { notEmtyString } from "./utils/js"
-import { CLIENT_NAV_CONFIG_NAMES, GET_NAV_META_DESCRIPTION } from './constants/configNames';
+import {  GET_NAV_META_DESCRIPTION } from './constants/configNames';
 import {
   BLOGS_HTMLS_DIRECTORY_NAME,
   LANG,
@@ -93,6 +96,10 @@ var Ajv = require("ajv")
 var ajv = new Ajv()
 
 const dirTree = require("directory-tree")
+
+const configKeys = values( CONFIG_NAMES_COLLECTION )
+const clientNavKeys = values( CLINET_NAV_CONFIG_NAMES_COLLECTION )
+const clientDetailKeys = values( CLINET_DETAIL_CONFIG_NAMES_COLLECTION )
 
 export class Store {
   root: string
@@ -256,7 +263,7 @@ export class Getters {
   get defaultClientNavMetaDescription(): string {
     const {
       [NAV_HTML_TITLE]: title,
-    } = this.store.config
+    } = this.store.config[NAV]
 
     const { clientDataForMetaDescription, utilGetters } = this
     const text = utilGetters.getCommonDataText(clientDataForMetaDescription)
@@ -268,13 +275,13 @@ export class Getters {
     const { defaultClientNavMetaDescription } = this
     let { [NAV_META_DESCRIPTION]: navMetaDescription = defaultClientNavMetaDescription,
       [GET_NAV_META_DESCRIPTION]: getNavMetaDescription
-    } = this.store.config
+    } = this.store.config[NAV]
 
 
     if (getNavMetaDescription) {
       const {
         [NAV_HTML_TITLE]: title,
-      } = this.store.config
+      } = this.store.config[NAV]
       const { clientDataForMetaDescription, utilGetters } = this
       const text = utilGetters.getCommonDataText(clientDataForMetaDescription)
 
@@ -295,7 +302,7 @@ export class Getters {
     const {
       [NAV_HTML_TITLE]: title,
       [NAV_SCRIPTS]: scripts,
-    } = this.store.config
+    } = this.store.config[NAV]
 
 
 
@@ -339,27 +346,20 @@ export class Getters {
       ...this.store.config
     }
 
-    const exceptionalKeys: any[] = CLIENT_NAV_CONFIG_NAMES
-
-    removeSomeResKeys(res, CONFIG_NAMES_COLLECTION)
+    res = pick( res, clientNavKeys )
 
     return res
-
-    function removeSomeResKeys(res: any = {}, object: any = {}) {
-      mapValues(object, (key: string) => {
-        if (!includes(exceptionalKeys, key)) {
-          delete res[key]
-        }
-      })
-    }
   }
 
   get clientNavNewestBlogs(): ClientNavBlog[] {
     const { blogsInfo, config } = this.store
     const {
-      [NAME_NEWEST_BLOGS_COUNT]: count,
       [TOP_DIRECTORY_NAME]: topDirectoryName
     } = config
+    const {
+      [NAME_NEWEST_BLOGS_COUNT]: count,
+    } = config[NAV]
+
     const all: ClientNavBlog[] = blogsInfo
       .map(
         ({
@@ -512,10 +512,10 @@ export class Getters {
 
   get [CLIENT_DETAIL_CONFIG](): ClientDetailConfig {
     const { store } = this
-    const { [LANG]: lang } = store[CONFIG]
-    return {
-      [LANG]: lang
-    }
+    let res: any = store[CONFIG]
+
+    res = pick( res, clientDetailKeys )
+    return res
   }
 
   getBlogInfo(directoryInfo: any): BlogInfo {
@@ -640,10 +640,14 @@ export class Getters {
       [CLIENT_DETAIL_CONFIG]: clientDetailConfig
     } = this
     const {
-      [DETAIL_SCRIPTS]: scripts,
       [LANG]: lang,
-      [NAV_HTML_TITLE]: title,
     } = store[CONFIG]
+    const {
+      [NAV_HTML_TITLE]: title,
+    } = store[CONFIG][NAV]
+    const {
+      [DETAIL_SCRIPTS]: scripts,
+    } = store[CONFIG][DETAIL]
     const { [NAME_PATH]: blogPath, [NAME]: blogName, [MARKED_HTML]: markedHtml } = blogInfo
 
     const string = readFileSync(blogPath)
@@ -777,6 +781,24 @@ export class Mutations {
     this.store.config = config
   }
 
+  COMBINE_UPDATE_CONFIG( config: Config ) {
+    const { [CONFIG]: currentConfig = {} } = this.store
+    const { [NAV]: currentConfigNav = {}, [DETAIL]: currentConfigDetail = {} } = <any>currentConfig
+    const { [NAV]: targetConfigNav = {}, [DETAIL]: targetConfigDetail = {} } = <any>config
+    this.store.config = {
+      ...currentConfig,
+      ...config,
+      [ NAV ]: {
+        ...currentConfigNav,
+        ...targetConfigNav,
+      },
+      [ DETAIL ]: {
+        ...currentConfigDetail,
+        ...targetConfigDetail,
+      },
+    }
+  }
+
   UPDATE_BLOGS_INFO(blogsInfo: BlogInfo[]) {
     this.store.blogsInfo = blogsInfo
   }
@@ -799,14 +821,9 @@ export class Actions {
 
   build(config?: Config) {
     const { mutations, store, getters } = this
-    const { root, [CONFIG]: currentConfig } = store
+    const { root } = store
 
-    const combinedConfig = {
-      ...currentConfig,
-      ...config
-    }
-
-    notNil(config) && mutations.UPDATE_CONFIG(combinedConfig)
+    notNil(config) && mutations.COMBINE_UPDATE_CONFIG(config)
 
     const {
       [NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML]: nameOfDirectoryPlacingDataExceptNavHtml

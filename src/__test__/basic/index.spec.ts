@@ -7,29 +7,37 @@ import {
   NAV_META_DESCRIPTION,
   GET_NAV_META_DESCRIPTION
 } from "../../constants/configNames"
-import { CN } from "../../constants/names"
+import { CN, NAV, DETAIL } from "../../constants/names"
 
-const PATH = require( "path" )
+const PATH = require("path")
 
-describe( `GetBlogsOriginInfo`, function() {
-  it( `Test`, function() {
-    const root = PATH.resolve( __dirname, "./rootCategory" )
-    const output = PATH.resolve( __dirname, "./output" )
+describe(`GetBlogsOriginInfo`, function () {
+  it(`Test`, function () {
+    const root = PATH.resolve(__dirname, "./rootCategory")
+    const output = PATH.resolve(__dirname, "./output")
 
     const slogan = "Custom slogan"
 
-    build( root, output, {
-      [ NAV_SCRIPTS ]             : [ '<script src="nav.test.js" />' ],
-      // [ NAV_META_DESCRIPTION ]: 'Custom nav meta description',
-      [ GET_NAV_META_DESCRIPTION ]: ( { title, text }: any ) => {
-        return `${title} ${slogan} ${text}`
-      },
-      [ DETAIL_SCRIPTS ]                                : [ '<script src="detail.test.js" />' ],
-      textLogo                                          : "Custom Blog",
-      [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]:
+    build(root, output, {
+      [NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML]:
         "nameOfDirectoryPlacingDataExceptNavHtml",
-      [ LANG ]: CN
-    } )
-    expect( true ).toBe( false )
-  } )
-} )
+      [LANG]: CN,
+
+      [NAV]: {
+        [NAV_SCRIPTS]: ['<script src="nav.test.js" />'],
+        // [ NAV_META_DESCRIPTION ]: 'Custom nav meta description',
+        [GET_NAV_META_DESCRIPTION]: ({ title, text }: any) => {
+          return `${title} ${slogan} ${text}`
+        },
+      },
+
+      [DETAIL]: {
+        [DETAIL_SCRIPTS]: ['<script src="detail.test.js" />'],
+      },
+
+      textLogo: "Custom Blog",
+      "other": "other",
+    })
+    expect(true).toBe(false)
+  })
+})
