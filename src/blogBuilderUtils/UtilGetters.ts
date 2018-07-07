@@ -245,6 +245,11 @@ export default class UtilGetters {
       getFileNameWithoutItsExtension( blogPath )
   }
 
+  getBlogDirectoryName( blogPath: string ): string {
+    const supperPath = PATH.resolve( blogPath, '../' )
+    return PATH.basename( supperPath )
+  }
+
   getStringWithHyphenConnected( string: string ) {
     return string.replace( / /g, "-" )
   }
