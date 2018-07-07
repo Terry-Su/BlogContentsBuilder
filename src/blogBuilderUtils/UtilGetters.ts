@@ -87,6 +87,7 @@ export default class UtilGetters {
 
     return `
 <div id="preRender" style="width:1px;height:1px;overflow:hidden;">${html}</div>`
+
     function recurToGetHtml( object: any = {} ) {
       if ( isString( object ) ) {
         const removedHtmlPunctionsString = removeHtmlPunctions( object )

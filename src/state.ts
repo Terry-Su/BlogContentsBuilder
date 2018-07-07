@@ -257,7 +257,7 @@ export class Getters {
 
   get clientNavPreRenderHtml(): string {
     const { utilGetters, clientNavGV } = this
-    return utilGetters.getHtmlWrappingData(clientNavGV)
+    return utilGetters.getHtmlWrappingData(clientNavGV[ NAV ])
   }
 
   get defaultClientNavMetaDescription(): string {
@@ -313,10 +313,7 @@ export class Getters {
       scriptsString = scriptsString + scriptString
     })
 
-    const GVJsonString = JSON.stringify(clientNavGV)
-
-
-
+    const GVJsonString = escape(JSON.stringify(clientNavGV))
 
     return `
   <!DOCTYPE html>
@@ -333,7 +330,7 @@ export class Getters {
     <div id="app"></div>
   
     
-    <script>window.GV=${GVJsonString}</script>
+    <script>window.GV={dataString: "${GVJsonString}"}</script>
     ${scriptsString}
   </body>
   </html>
@@ -663,9 +660,10 @@ export class Getters {
       ...clientBlogProps,
       [CONFIG]: clientDetailConfig
     }
-    const GVJsonString = JSON.stringify(GV)
+    const GVJsonString = escape(JSON.stringify(GV))
 
-    const preRenderHtml = utilGetters.getHtmlWrappingData(GV)
+    const preRenderData = delete cloneDeep( GV )[ CONFIG ]
+    const preRenderHtml = utilGetters.getHtmlWrappingData(preRenderData)
 
     const metaDescription = utilGetters.getClientBlogMetaDescription(GV, markedHtml)
 
@@ -685,7 +683,7 @@ export class Getters {
     <div id="app"></div>
   
     
-    <script>window.GV=${GVJsonString}</script>
+    <script>window.GV={ dataString: "${GVJsonString}" }</script>
     ${scriptsString}
   </body>
   </html>
