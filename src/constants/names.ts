@@ -22,6 +22,7 @@ export const NAV = 'nav'
 export const CLIENT_NAV = 'clientNav'
 export const CLIENT_NAV_GV = 'clientNavGV'
 export const DETAIL = 'detail'
+export const BLOG_PROPS = 'blogProps'
 
 export const FILE = 'file'
 export const DIRECTORY = 'directory'

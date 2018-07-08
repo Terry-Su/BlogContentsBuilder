@@ -1,4 +1,4 @@
-import { MARKED_HTML, UNIQUE_HTML_NAME } from './../constants/names';
+import { MARKED_HTML, UNIQUE_HTML_NAME, BLOG_PROPS } from './../constants/names';
 import { RELATIVE_CLIENT_URL, CATEGORY_SEQUENCE, RELATIVE_CLIENT_PROPS_URL } from '../constants/names';
 import {
   NAME,
@@ -7,6 +7,7 @@ import {
   NAME_PATH,
   INTRODUCTION
 } from "../constants/names"
+import { BlogProps } from './BlogProps';
 
 interface BlogInfo {
   [NAME_PATH]: string
@@ -19,4 +20,5 @@ interface BlogInfo {
   [TAGS]: string[]
   [INTRODUCTION]: string,
   [UNIQUE_HTML_NAME]: string
+  [BLOG_PROPS]: BlogProps
 }

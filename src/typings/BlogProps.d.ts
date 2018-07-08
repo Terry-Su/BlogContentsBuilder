@@ -5,5 +5,5 @@ interface BlogProps {
   [CREATE_TIME]?: string
   [TAGS]?: string[],
   [INTRODUCTION]?: string,
-  [UNIQUE_HTML_NAME]?: string
+  [UNIQUE_HTML_NAME]?: string,
 }

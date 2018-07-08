@@ -40,7 +40,8 @@ import {
   CLIENT_NAV,
   UNIQUE_HTML_NAME,
   CLIENT_NAV_CONFIG,
-  DETAIL
+  DETAIL,
+  BLOG_PROPS
 } from "./constants/names"
 import { ClientNavBlog } from "./typings/ClientNavBlog"
 import { BlogProps } from "./typings/BlogProps"
@@ -565,7 +566,8 @@ export class Getters {
           [CATEGORY_SEQUENCE]: categorySequence,
           [TAGS]: tags,
           [INTRODUCTION]: introduction,
-          [UNIQUE_HTML_NAME]: uniqueHtmlName
+          [UNIQUE_HTML_NAME]: uniqueHtmlName,
+          [BLOG_PROPS]: blogProps
         }
 
         return blogInfo
@@ -648,7 +650,7 @@ export class Getters {
     const {
       [DETAIL_SCRIPTS]: scripts,
     } = store[CONFIG][DETAIL]
-    const { [NAME_PATH]: blogPath, [NAME]: blogName, [MARKED_HTML]: markedHtml,  [UNIQUE_HTML_NAME]: uniqueHtmlName } = blogInfo
+    const { [NAME_PATH]: blogPath, [NAME]: blogName, [MARKED_HTML]: markedHtml,  [UNIQUE_HTML_NAME]: uniqueHtmlName, [BLOG_PROPS]: blogProps } = blogInfo
 
     const string = readFileSync(blogPath)
 
@@ -662,7 +664,8 @@ export class Getters {
     const GV: ClientBlogGV = {
       ...clientBlogProps,
       [CONFIG]: clientDetailConfig,
-      [UNIQUE_HTML_NAME]: uniqueHtmlName
+      [UNIQUE_HTML_NAME]: uniqueHtmlName,
+      [BLOG_PROPS]: blogProps
     }
     const GVJsonString = escape(JSON.stringify(GV))
 
