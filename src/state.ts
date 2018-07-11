@@ -89,7 +89,8 @@ import {
   TOP_DIRECTORY_NAME,
   NAV_HTML_TITLE,
   SITEMAP_FILE_NAME,
-  SITEMAP_ROOT_WEBSITE
+  SITEMAP_ROOT_WEBSITE,
+  FILES_COPY_TO_OUTPUT
 } from "./constants/configNames"
 import * as CONFIG_NAMES_COLLECTION from "./constants/configNames"
 import * as CLINET_NAV_CONFIG_NAMES_COLLECTION from "./constants/clientNavConfigNames"
@@ -882,6 +883,7 @@ export class Actions {
     this.buildTags()
     this.buildBlogDetailPages()
     this.buildSitemap()
+    this.buildCopyingFiles()
   }
 
   buildNavHtml() {
@@ -967,5 +969,12 @@ export class Actions {
       const { sitemapContent, outputSitemapFilePath } = this.getters
       FS.outputFileSync( outputSitemapFilePath, sitemapContent )
     }
+  }
+
+  buildCopyingFiles( ) {
+    const { output } = this.store
+    const { [ FILES_COPY_TO_OUTPUT ]: files_copy_to_output  } = this.store.config
+    debugger
+    files_copy_to_output.map( file => FS.copyFileSync( file, PATH.resolve( output, PATH.basename( file ) ) ) )
   }
 }

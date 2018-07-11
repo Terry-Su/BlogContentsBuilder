@@ -8,7 +8,8 @@ import {
   NAV_META_DESCRIPTION,
   GET_NAV_META_DESCRIPTION,
   SITEMAP_FILE_NAME,
-  SITEMAP_ROOT_WEBSITE
+  SITEMAP_ROOT_WEBSITE,
+  FILES_COPY_TO_OUTPUT
 } from "../configNames"
 import {
   TOP_DIRECTORY_NAME,
@@ -31,8 +32,11 @@ export const DEFAULT_CONFIG: Config = {
 
   [ LANG ]: EN,
 
-  [ SITEMAP_FILE_NAME ]   : null,
+  [ SITEMAP_FILE_NAME ]: null,
+
   [ SITEMAP_ROOT_WEBSITE ]: null,
+
+  [ FILES_COPY_TO_OUTPUT ]: [],
 
   /**
    * Nav
