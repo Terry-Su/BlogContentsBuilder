@@ -766,19 +766,25 @@ export class Getters {
   /**
    * // Sitemap
    */
-  shouldBuildSitemap() {
+  get shouldBuildSitemap() {
     const {
       [ SITEMAP_FILE_NAME ]: sitemap_file_name,
       [ SITEMAP_ROOT_WEBSITE ]: sitemap_root_website
     } = this.store.config
     return notNil( sitemap_file_name ) && notNil( sitemap_root_website )
   }
-  sitemapFilePath() {
+  get outputSitemapFilePath(): string {
+    const { outputPlacingData } = this
     const { [ SITEMAP_FILE_NAME ]: sitemap_file_name } = this.store.config
+    return PATH.resolve( outputPlacingData, sitemap_file_name )
   }
-  sitemapContent() {
+  get sitemapContent(): string {
     // const { utilGetters } = this
+    const { blogsInfo } = this.store
     const { [ SITEMAP_ROOT_WEBSITE ]: sitemap_root_website } = this.store.config
+    const texts = blogsInfo.map( ( { [RELATIVE_CLIENT_URL]: relative_client_url } ) => `${sitemap_root_website}/${relative_client_url}` )
+    return texts.reduce( (start, current) => `${start}
+${current}` )
   }
 }
 
@@ -958,6 +964,8 @@ export class Actions {
   buildSitemap() {
     const { shouldBuildSitemap } = this.getters
     if ( shouldBuildSitemap ) {
+      const { sitemapContent, outputSitemapFilePath } = this.getters
+      FS.outputFileSync( outputSitemapFilePath, sitemapContent )
     }
   }
 }
