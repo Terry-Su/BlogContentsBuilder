@@ -774,9 +774,9 @@ export class Getters {
     return notNil( sitemap_file_name ) && notNil( sitemap_root_website )
   }
   get outputSitemapFilePath(): string {
-    const { outputPlacingData } = this
+    const { output } = this.store
     const { [ SITEMAP_FILE_NAME ]: sitemap_file_name } = this.store.config
-    return PATH.resolve( outputPlacingData, sitemap_file_name )
+    return PATH.resolve( output, sitemap_file_name )
   }
   get sitemapContent(): string {
     // const { utilGetters } = this
