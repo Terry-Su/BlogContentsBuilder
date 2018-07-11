@@ -1,8 +1,15 @@
-import { DETAILS, NAV, DETAIL } from './../names';
-import { ALL, BLOG, EN } from '../names';
+import { DETAILS, NAV, DETAIL } from "./../names"
+import { ALL, BLOG, EN } from "../names"
 import { Config } from "../../typings/Config"
 import { DEFAULT_NEWEST_BLOGS_COUNT } from "../numbers"
-import { BLOGS_HTMLS_DIRECTORY_NAME, LANG, NAV_META_DESCRIPTION, GET_NAV_META_DESCRIPTION } from '../configNames';
+import {
+  BLOGS_HTMLS_DIRECTORY_NAME,
+  LANG,
+  NAV_META_DESCRIPTION,
+  GET_NAV_META_DESCRIPTION,
+  SITEMAP_FILE_NAME,
+  SITEMAP_ROOT_WEBSITE
+} from "../configNames"
 import {
   TOP_DIRECTORY_NAME,
   NAME_NEWEST_BLOGS_COUNT,
@@ -16,30 +23,32 @@ export const DEFAULT_CONFIG: Config = {
   /**
    * System
    */
-  [BLOGS_HTMLS_DIRECTORY_NAME]: DETAILS,
+  [ BLOGS_HTMLS_DIRECTORY_NAME ]: DETAILS,
+
+  [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]: null,
+
+  [ TOP_DIRECTORY_NAME ]: ALL,
+
+  [ LANG ]: EN,
+
+  [ SITEMAP_FILE_NAME ]   : null,
+  [ SITEMAP_ROOT_WEBSITE ]: null,
 
   /**
-   * Common
-   */
-  [NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML]: null,
-  [TOP_DIRECTORY_NAME]: ALL,
-  [LANG]: EN,
-
-   /**
    * Nav
    */
-  [NAV]: {
-    [NAV_HTML_TITLE]: BLOG,
-    [NAME_NEWEST_BLOGS_COUNT]: DEFAULT_NEWEST_BLOGS_COUNT,
-    [NAV_SCRIPTS]: [],
-    [NAV_META_DESCRIPTION]: undefined,
-    [GET_NAV_META_DESCRIPTION]: undefined,
+  [ NAV ]: {
+    [ NAV_HTML_TITLE ]          : BLOG,
+    [ NAME_NEWEST_BLOGS_COUNT ] : DEFAULT_NEWEST_BLOGS_COUNT,
+    [ NAV_SCRIPTS ]             : [],
+    [ NAV_META_DESCRIPTION ]    : undefined,
+    [ GET_NAV_META_DESCRIPTION ]: undefined
   },
 
   /**
    * Detail
    */
-  [DETAIL]: {
-    [DETAIL_SCRIPTS]: [],
-  }, 
+  [ DETAIL ]: {
+    [ DETAIL_SCRIPTS ]: []
+  }
 }

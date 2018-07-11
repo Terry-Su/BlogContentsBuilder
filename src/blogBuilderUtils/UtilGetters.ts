@@ -254,4 +254,12 @@ export default class UtilGetters {
   getStringWithHyphenConnected( string: string ) {
     return string.replace( / /g, "-" )
   }
+
+
+  // /**
+  //  * // Sitemap
+  //  */
+  // getSitemapContent( sitemap_root_website: string ) {
+  //   return sitemap_root_website
+  // }
 }

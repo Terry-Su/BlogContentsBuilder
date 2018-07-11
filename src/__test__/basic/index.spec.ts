@@ -5,7 +5,9 @@ import {
   NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML,
   LANG,
   NAV_META_DESCRIPTION,
-  GET_NAV_META_DESCRIPTION
+  GET_NAV_META_DESCRIPTION,
+  SITEMAP_FILE_NAME,
+  SITEMAP_ROOT_WEBSITE
 } from "../../constants/configNames"
 import { CN, NAV, DETAIL } from "../../constants/names"
 
@@ -15,13 +17,18 @@ describe(`GetBlogsOriginInfo`, function () {
   it(`Test`, function () {
     const root = PATH.resolve(__dirname, "./rootCategory")
     const output = PATH.resolve(__dirname, "./output")
-
     const slogan = "Custom slogan"
+    const sitemapFileName = "sitemap.txt"
+    const sitemapRootWebsite = "http://testWebsite.io"
+
 
     build(root, output, {
       [NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML]:
         "nameOfDirectoryPlacingDataExceptNavHtml",
       [LANG]: CN,
+
+      [SITEMAP_FILE_NAME]: sitemapRootWebsite,
+      [SITEMAP_ROOT_WEBSITE]: sitemapFileName,
 
       [NAV]: {
         [NAV_SCRIPTS]: ['<script src="nav.test.js" />'],
