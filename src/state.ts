@@ -974,7 +974,6 @@ export class Actions {
   buildCopyingFiles( ) {
     const { output } = this.store
     const { [ FILES_COPY_TO_OUTPUT ]: files_copy_to_output  } = this.store.config
-    debugger
     files_copy_to_output.map( file => FS.copyFileSync( file, PATH.resolve( output, PATH.basename( file ) ) ) )
   }
 }
