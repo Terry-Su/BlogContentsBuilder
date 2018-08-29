@@ -816,9 +816,7 @@ export class Mutations {
       [ NAV ]: currentConfigNav = {},
       [ DETAIL ]: currentConfigDetail = {}
     } = <any>currentConfig
-    const { [ NAV ]: targetConfigNav = {}, [ DETAIL ]: targetConfigDetail = {} } = <
-      any
-    >config
+    const { [ NAV ]: targetConfigNav = {}, [ DETAIL ]: targetConfigDetail = {} } = <any>config
     this.store.config = {
       ...currentConfig,
       ...config,
@@ -907,14 +905,15 @@ export class Actions {
       const {
         [ NAME ]: name,
         [ BLOGS ]: blogs,
-        [ CATEGORIES ]: categories
+        [ CATEGORIES ]: categories,
+        [ ALL_BLOGS ]: allBlogs
       } = category
       const categoryJsonDirectoryPath = PATH.resolve( upperDirectoryPath, name )
       const outputPath: string = utilGetters.getClientCategoryJsonPath(
         categoryJsonDirectoryPath
       )
       const json = {
-        [ BLOGS ]: blogs
+        [ BLOGS ]: allBlogs
       }
       FS.outputJson( outputPath, json )
 
