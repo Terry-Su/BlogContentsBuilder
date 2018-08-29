@@ -113,6 +113,7 @@ import { ClientDetailConfig } from "./typings/ClientDetailConfig"
 import { ClientNavConfig } from "./typings/ClientNavConfig"
 import { ClientNavGV } from "./typings/clientNavGV"
 import { ClientBlogGV } from "./typings/ClientBlogGV"
+import sortBlogInfosByCreateTime from "./blogBuilderUtils/sortBlogInfosByCreateTime"
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -389,22 +390,12 @@ export class Getters {
           [ INTRODUCTION ]       : introduction
         } )
       )
-      .sort( sort )
+      .sort( sortBlogInfosByCreateTime )
 
     const res: ClientNavBlog[] = take( all, count )
     return res
 
-    function sort(
-      { [ CREATE_TIME ]: timeString1 }: ClientNavBlog,
-      { [ CREATE_TIME ]: timeString2 }: ClientNavBlog
-    ) {
-      if ( isValidDateString( timeString1 ) && isValidDateString( timeString2 ) ) {
-        const t1 = Date.parse( timeString1 )
-        const t2 = Date.parse( timeString2 )
-        return t2 - t1
-      }
-      return 0
-    }
+    
   }
 
   get clientNavCategory(): ClientNavCategory {
@@ -587,6 +578,8 @@ export class Getters {
 
     resolveRoot( path )
 
+    res.sort( sortBlogInfosByCreateTime )
+    
     return res
 
     function resolveRoot( path: string ) {
@@ -610,7 +603,7 @@ export class Getters {
     let res: BlogInfo[] = []
 
     resolveRoot( path )
-
+    res = res.sort( sortBlogInfosByCreateTime )
     return res
 
     function resolveRoot( path: string ) {
@@ -783,8 +776,8 @@ export class Getters {
     // const { utilGetters } = this
     const { blogsInfo } = this.store
     const { [ SITEMAP_ROOT_WEBSITE ]: sitemap_root_website } = this.store.config
-    const texts = blogsInfo.map( ( { [RELATIVE_CLIENT_URL]: relative_client_url } ) => `${sitemap_root_website}/${relative_client_url}` )
-    return texts.reduce( (start, current) => `${start}
+    const texts = blogsInfo.map( ( { [ RELATIVE_CLIENT_URL ]: relative_client_url } ) => `${sitemap_root_website}/${relative_client_url}` )
+    return texts.reduce( ( start, current ) => `${start}
 ${current}` )
   }
 }
