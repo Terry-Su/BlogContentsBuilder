@@ -113,7 +113,7 @@ import { ClientDetailConfig } from "./typings/ClientDetailConfig"
 import { ClientNavConfig } from "./typings/ClientNavConfig"
 import { ClientNavGV } from "./typings/clientNavGV"
 import { ClientBlogGV } from "./typings/ClientBlogGV"
-import sortBlogInfosByCreateTime from "./blogBuilderUtils/sortBlogInfosByCreateTime"
+import sortBlogsByCreateTime from "./blogBuilderUtils/sortBlogsByCreateTime"
 
 var Ajv = require( "ajv" )
 var ajv = new Ajv()
@@ -390,7 +390,7 @@ export class Getters {
           [ INTRODUCTION ]       : introduction
         } )
       )
-      .sort( sortBlogInfosByCreateTime )
+      .sort( sortBlogsByCreateTime )
 
     const res: ClientNavBlog[] = take( all, count )
     return res
@@ -578,7 +578,7 @@ export class Getters {
 
     resolveRoot( path )
 
-    res.sort( sortBlogInfosByCreateTime )
+    res.sort( sortBlogsByCreateTime )
     
     return res
 
@@ -603,7 +603,7 @@ export class Getters {
     let res: BlogInfo[] = []
 
     resolveRoot( path )
-    res = res.sort( sortBlogInfosByCreateTime )
+    res = res.sort( sortBlogsByCreateTime )
     return res
 
     function resolveRoot( path: string ) {
