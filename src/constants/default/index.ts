@@ -1,4 +1,4 @@
-import { DETAILS, NAV, DETAIL } from "./../names"
+import { NAV, DETAIL } from "./../names"
 import { ALL, BLOG, EN } from "../names"
 import { Config } from "../../typings/Config"
 import { DEFAULT_NEWEST_BLOGS_COUNT } from "../numbers"
@@ -24,7 +24,7 @@ export const DEFAULT_CONFIG: Config = {
   /**
    * System
    */
-  [ BLOGS_HTMLS_DIRECTORY_NAME ]: DETAILS,
+  [ BLOGS_HTMLS_DIRECTORY_NAME ]: DETAIL,
 
   [ NAME_OF_DIRECTORY_PLACING_DATA_EXCEPT_NAV_HTML ]: null,
 

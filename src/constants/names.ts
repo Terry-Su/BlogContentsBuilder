@@ -31,7 +31,6 @@ export const PROPS = 'props'
 
 export const ALL = 'All'
 export const BLOG = 'Blog'
-export const DETAILS = 'details'
 
 export const DOT_MD = '.md'
 export const DOT_JSON = '.json'
